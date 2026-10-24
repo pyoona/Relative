@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ผังสายสกุล</title>
+<meta name="description" content="ผังรวมรายชื่อญาติพี่น้อง พร้อมคำเรียกญาติแบบไทย">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=Trirong:wght@500;600&display=swap">
+<script>
+/* ===================== ตั้งค่า (แก้ตรงนี้) =====================
+   วางลิงก์ Web app ที่ได้จาก Apps Script ของ Google Sheet (ลงท้ายด้วย /exec)
+   ถ้าเว้นว่างไว้ เว็บจะแสดงตระกูลตัวอย่างแทน */
+window.FAMILY_CONFIG = {
+  SHEET_API: "https://script.google.com/macros/s/AKfycby4IcvEYFNhIzAXJrAVDkye3hVvw_dwX3tRPMWwc63hgk0FtqtYFoRb3kEsQsAr0CAB/exec"   // เช่น "https://script.google.com/macros/s/xxxxxxxx/exec"
+};
+/* ============================================================== */
+</script>
+<style>
+:root{
+  --bg:#EDEFE9; --surface:#FBFBF7; --raised:#FFFFFF; --ink:#1D2433; --muted:#5D6575;
+  --line:#AEB5A8; --accent:#2F4F8F; --accent-soft:#DCE3F0; --gold:#94690F; --gold-soft:#F2E5C3;
+  --danger:#A33A2C; --shadow:rgba(29,36,51,.10);
+  --f-display:"Trirong","Noto Serif Thai",Georgia,serif;
+  --f-body:"Anuphan","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#13161C; --surface:#1B1F27; --raised:#222733; --ink:#E6E8EE; --muted:#9AA1AF;
+  --line:#485062; --accent:#93ACE0; --accent-soft:#25314A; --gold:#DDB65F; --gold-soft:#3A3120;
+  --danger:#E58676; --shadow:rgba(0,0,0,.35); color-scheme:dark }}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;padding-top:env(safe-area-inset-top,0px)}
+button,input,select,textarea{font:inherit;color:inherit}
+img{max-width:100%}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:flex;flex-direction:column;min-height:100%}
+header{padding-block:14px 12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;border-bottom:1px solid var(--line)}
+h1{font-family:var(--f-display);font-weight:600;font-size:1.75rem;line-height:1.2;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field>span{font-size:.78rem;color:var(--muted);letter-spacing:.02em}
+input,select,textarea{background:var(--raised);border:1px solid var(--line);border-radius:6px;padding:7px 10px;min-width:0;width:100%}
+textarea{resize:vertical;min-height:64px}
+.search{position:relative;width:220px;max-width:100%}
+.results{position:absolute;z-index:5;top:100%;left:0;right:0;margin-top:4px;background:var(--raised);border:1px solid var(--line);border-radius:6px;box-shadow:0 6px 18px var(--shadow);overflow:hidden}
+.results button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;cursor:pointer}
+.results button:hover,.results button:focus-visible{background:var(--accent-soft)}
+.banner{margin:12px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));padding:10px 14px;border-radius:8px;background:var(--gold-soft);display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.banner.quiet{background:var(--accent-soft)}
+.banner p{margin:0;max-width:62ch}
+.banner form{display:flex;gap:8px;flex-wrap:wrap;margin:0;align-items:center}
+.banner input{width:180px}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 370px;min-height:0}
+.stagewrap{position:relative;min-width:0;min-height:420px}
+.stage{position:absolute;inset:0;overflow:auto;cursor:grab}
+.stage.drag{cursor:grabbing;user-select:none}
+.sizer{position:relative}
+.inner{position:absolute;left:0;top:0;transform-origin:0 0}
+.inner svg{position:absolute;left:0;top:0;overflow:visible}
+.zoom{position:absolute;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;z-index:3}
+.zoom button{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--raised);cursor:pointer;font-size:1.1rem}
+.msg{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);padding:24px;text-align:center}
+.msg p{max-width:44ch}
+.card{position:absolute;width:176px;height:84px;padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--surface);text-align:left;cursor:pointer;display:flex;align-items:center;gap:9px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.card .txt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.card:hover{border-color:var(--accent)}
+.card.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.card.me{background:var(--gold-soft);border-color:var(--gold)}
+.card.dead{opacity:.8}
+.term{font-size:.74rem;font-weight:600;color:var(--accent);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card.me .term{color:var(--gold)}
+.nm{font-weight:600;font-size:.9rem;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yr{font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.av{flex:none;width:52px;height:60px;border-radius:4px;border:2px solid var(--raised);box-shadow:0 0 0 1px var(--line);background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;overflow:hidden;font-family:var(--f-display);font-weight:600;font-size:1.15rem;position:relative}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card.me .av{background:var(--surface);color:var(--gold)}
+.card.dead .av img{filter:grayscale(1)}
+.av.big{width:120px;height:144px;font-size:2.6rem;border-width:3px;border-radius:6px}
+.photo-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.photo-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+aside{border-left:1px solid var(--line);background:var(--surface);padding-block:18px 28px;padding-left:20px;padding-right:max(20px,env(safe-area-inset-right,0px));overflow:auto;min-width:0}
+aside h2{font-family:var(--f-display);font-weight:600;font-size:1.35rem;margin:0;line-height:1.25;text-wrap:balance}
+aside h3{font-size:.78rem;letter-spacing:.06em;color:var(--muted);margin:20px 0 8px;font-weight:600}
+.kin{margin:10px 0 0;padding:10px 12px;border-radius:8px;background:var(--accent-soft)}
+.kin b{font-family:var(--f-display);font-size:1.25rem;font-weight:600;color:var(--accent)}
+.kin small{display:block;color:var(--muted)}
+dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:14px 0 0}
+dt{color:var(--muted);font-size:.85rem}
+dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.rel{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--raised);border-radius:999px;padding:3px 11px;cursor:pointer;font-size:.86rem}
+.chip:hover{border-color:var(--accent)}
+.add{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px}
+.btn{border:1px solid var(--line);background:var(--raised);border-radius:6px;padding:7px 12px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.danger{color:var(--danger)}
+.btn.danger.solid{background:var(--danger);border-color:var(--danger);color:var(--surface)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+aside form{display:grid;gap:12px;margin-top:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.radio{display:flex;gap:14px}
+.radio label{display:flex;gap:6px;align-items:center}
+.radio input{width:auto}
+.hint{font-size:.82rem;color:var(--muted);margin:0}
+.err{color:var(--danger);font-size:.86rem;margin:0}
+.empty{color:var(--muted)}
+.empty p{max-width:40ch}
+.note{font-size:.84rem;color:var(--muted);margin:8px 0 0}
+.gate{max-width:380px;margin:12vh auto;padding:0 16px;display:grid;gap:12px}
+.gate h1{font-size:2rem}
+@media (max-width:860px){
+  main{grid-template-columns:minmax(0,1fr)}
+  .stagewrap{height:60vh;min-height:360px}
+  aside{border-left:0;border-top:1px solid var(--line);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}
+  .search{width:100%}
+  .tools{width:100%}
+  .tools .field{flex:1 1 160px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="gate" id="gate" hidden>
+  <h1>ผังสายสกุล</h1>
+  <p>ผังนี้เปิดดูได้เฉพาะคนในครอบครัว ใส่รหัสครอบครัวที่ได้รับจากผู้ดูแล</p>
+  <form id="gateform">
+    <label class="field" for="gatecode"><span>รหัสครอบครัว</span><input id="gatecode" autocomplete="off" required></label>
+    <p class="err" id="gateerr" hidden>รหัสไม่ถูกต้อง ลองอีกครั้ง หรือถามผู้ดูแลผัง</p>
+    <div class="row"><button class="btn primary" type="submit">เข้าดูผัง</button></div>
+  </form>
+</div>
+<div class="app" id="app">
+  <header>
+    <div>
+      <h1 id="title">ผังสายสกุล</h1>
+      <p class="sub" id="sub">รวมรายชื่อญาติพี่น้อง พร้อมคำเรียกญาติแบบไทย</p>
+    </div>
+    <div class="tools">
+      <label class="field" for="ego"><span>คำเรียก มองจากมุมของ</span>
+        <select id="ego"></select></label>
+      <div class="field search"><span>ค้นหาชื่อ</span>
+        <input id="q" type="search" placeholder="ชื่อ หรือชื่อเล่น" autocomplete="off">
+        <div class="results" id="results" hidden></div>
+      </div>
+    </div>
+  </header>
+  <div class="banner" id="banner" hidden></div>
+  <main>
+    <div class="stagewrap">
+      <div class="stage" id="stage"><div class="sizer" id="sizer"><div class="inner" id="inner"></div></div></div>
+      <div class="msg" id="msg" hidden></div>
+      <div class="zoom">
+        <button id="zout" aria-label="ย่อ">−</button>
+        <button id="zin" aria-label="ขยาย">+</button>
+      </div>
+    </div>
+    <aside id="panel"></aside>
+  </main>
+</div>
+
+<script>
+const W=176,H=84,CG=14,KG=22,RG=70,TG=64,PAD=28;
+const NOW_BE=new Date().getFullYear()+543;
+const CFG=window.FAMILY_CONFIG||{};
+const S={mode:'demo',people:new Map(),sel:null,ego:null,panel:{t:'view'},zoom:1,
+  editCode:null,viewCode:null,editing:false,sb:null,familyName:'',loadErr:null,editPrompt:false};
+
+/* ---------- ตระกูลตัวอย่าง ---------- */
+const DEMO=[
+ {id:'d1',name:'สมชาย ศรีสวัสดิ์',gender:'m',birthYear:2478,deathYear:2558,spouseIds:['d2'],place:'อยุธยา'},
+ {id:'d2',name:'บุญมา ศรีสวัสดิ์',gender:'f',birthYear:2482,deathYear:2561,spouseIds:['d1']},
+ {id:'d3',name:'ประเสริฐ ศรีสวัสดิ์',gender:'m',birthYear:2503,birthOrder:1,fatherId:'d1',motherId:'d2',spouseIds:['d13']},
+ {id:'d5',name:'สมศักดิ์ ศรีสวัสดิ์',gender:'m',birthYear:2507,birthOrder:2,fatherId:'d1',motherId:'d2',spouseIds:['d6']},
+ {id:'d4',name:'วันเพ็ญ ศรีสวัสดิ์',gender:'f',birthYear:2511,birthOrder:3,fatherId:'d1',motherId:'d2'},
+ {id:'d13',name:'ละออ ศรีสวัสดิ์',gender:'f',birthYear:2505,spouseIds:['d3']},
+ {id:'d7',name:'ทองดี ใจงาม',gender:'m',birthYear:2485,deathYear:2563,spouseIds:['d8'],place:'สุพรรณบุรี'},
+ {id:'d8',name:'สำเนียง ใจงาม',gender:'f',birthYear:2488,spouseIds:['d7']},
+ {id:'d9',name:'สุดา ใจงาม',gender:'f',birthYear:2508,birthOrder:1,fatherId:'d7',motherId:'d8'},
+ {id:'d6',name:'มาลี ศรีสวัสดิ์',nick:'ลี',gender:'f',birthYear:2512,birthOrder:2,fatherId:'d7',motherId:'d8',spouseIds:['d5']},
+ {id:'d10',name:'วิชัย ใจงาม',gender:'m',birthYear:2515,birthOrder:3,fatherId:'d7',motherId:'d8'},
+ {id:'d11',name:'ณัฐพล ศรีสวัสดิ์',nick:'ต้น',gender:'m',birthYear:2538,birthOrder:1,fatherId:'d5',motherId:'d6',spouseIds:['d16']},
+ {id:'d12',name:'พิมพ์ชนก ศรีสวัสดิ์',nick:'แพร',gender:'f',birthYear:2541,birthOrder:2,fatherId:'d5',motherId:'d6',place:'กรุงเทพฯ'},
+ {id:'d16',name:'ศิริพร ศรีสวัสดิ์',gender:'f',birthYear:2539,spouseIds:['d11']},
+ {id:'d17',name:'ข้าวหอม ศรีสวัสดิ์',nick:'ข้าว',gender:'f',birthYear:2566,fatherId:'d11',motherId:'d16'},
+ {id:'d14',name:'ธนากร ศรีสวัสดิ์',nick:'บอส',gender:'m',birthYear:2543,fatherId:'d3',motherId:'d13',note:'อายุน้อยกว่าแพร แต่แพรต้องเรียกว่า "พี่" เพราะพ่อของบอสเป็นพี่ของพ่อแพร'},
+ {id:'d15',name:'กานต์ ใจงาม',gender:'m',birthYear:2536,fatherId:'d10',note:'อายุมากกว่าแพร แต่เป็น "น้อง" เพราะพ่อของกานต์เป็นน้องของแม่แพร'},
+];
+function loadDemo(){S.people=new Map(DEMO.map(p=>[p.id,{...p,spouseIds:[...(p.spouseIds||[])]}]));S.ego='d12';S.sel='d12';}
+
+/* ---------- helpers ---------- */
+const P=id=>S.people.get(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let KIDS=new Map();
+function indexKids(){KIDS=new Map();for(const p of S.people.values())for(const k of [p.fatherId,p.motherId])if(k&&S.people.has(k)){if(!KIDS.has(k))KIDS.set(k,[]);KIDS.get(k).push(p.id);}}
+const parentsOf=p=>[p.fatherId,p.motherId].filter(x=>x&&S.people.has(x));
+const spousesOf=p=>(p.spouseIds||[]).filter(x=>S.people.has(x));
+const kidsOf=id=>KIDS.get(id)||[];
+const label=p=>p?(p.nick?`${p.name} (${p.nick})`:p.name):'';
+const short=p=>p.nick||p.name.split(' ')[0];
+function sortKids(a){return a.sort((x,y)=>{const a1=P(x),b1=P(y);const o=(a1.birthOrder||99)-(b1.birthOrder||99);return o||(a1.birthYear||9999)-(b1.birthYear||9999);});}
+function years(p){
+  if(!p.birthYear&&!p.deathYear)return '';
+  if(p.deathYear)return `พ.ศ. ${p.birthYear||'?'}–${p.deathYear}`;
+  return `เกิด พ.ศ. ${p.birthYear} · อายุ ${NOW_BE-p.birthYear}`;
+}
+const newId=()=>'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+function recall(k){try{return localStorage.getItem(k)}catch(e){return null}}
+const photoSrc=p=>p.photo||'';
+function initial(p){const s=(p.nick||p.name||'?').replace(/^[เแโใไ]/,'');return s.charAt(0)||'?';}
+function avatar(p,big){const src=photoSrc(p);
+  return `<span class="av${big?' big':''}" aria-hidden="true">${esc(initial(p))}${src?`<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()">`:''}</span>`;}
+async function shrink(file){
+  let bmp;try{bmp=await createImageBitmap(file);}catch(e){throw {code:'decode'};}
+  for(const [max,q] of [[240,.82],[200,.72],[160,.65],[120,.6]]){
+    const r=Math.min(1,max/Math.max(bmp.width,bmp.height));
+    const c=document.createElement('canvas');c.width=Math.round(bmp.width*r);c.height=Math.round(bmp.height*r);
+    c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    const url=c.toDataURL('image/jpeg',q);if(url.length<45000)return url;
+  }
+  throw {code:'decode'};
+}
+const photoErr=x=>x&&x.code==='decode'?'เปิดไฟล์รูปนี้ไม่ได้ ลองใช้ไฟล์ JPG, PNG หรือ WEBP':'ใส่รูปไม่สำเร็จ ลองอีกครั้ง';
+
+/* ---------- คำเรียกญาติ ---------- */
+function ancestry(id){
+  const m=new Map([[id,[id]]]);const q=[id];
+  while(q.length){const c=q.shift();for(const p of parentsOf(P(c)))if(!m.has(p)){m.set(p,[...m.get(c),p]);q.push(p);}}
+  return m;
+}
+function senior(x,y){
+  const a=P(x),b=P(y);
+  const same=parentsOf(a).some(i=>parentsOf(b).includes(i));
+  if(same&&a.birthOrder&&b.birthOrder&&a.birthOrder!==b.birthOrder)return a.birthOrder<b.birthOrder?-1:1;
+  if(a.birthYear&&b.birthYear&&a.birthYear!==b.birthYear)return a.birthYear<b.birthYear?-1:1;
+  if(a.birthOrder&&b.birthOrder&&a.birthOrder!==b.birthOrder)return a.birthOrder<b.birthOrder?-1:1;
+  return 0;
+}
+const up=id=>P(id).gender==='m'?'พ่อ':'แม่';
+const down=id=>P(id).gender==='m'?'ลูกชาย':'ลูกสาว';
+function sibWord(t,ref){const m=P(t).gender==='m',s=senior(t,ref);return s<0?(m?'พี่ชาย':'พี่สาว'):s>0?(m?'น้องชาย':'น้องสาว'):(m?'พี่/น้องชาย':'พี่/น้องสาว');}
+const chain=w=>w.slice().reverse().join('ของ');
+function blood(e,t){
+  const A=ancestry(e),B=ancestry(t);let best=null;
+  for(const [c,pe] of A)if(B.has(c)){const pt=B.get(c);const d=pe.length+pt.length;if(!best||d<best.d)best={d,pe,pt};}
+  if(!best)return null;
+  const {pe,pt}=best,a=pe.length-1,b=pt.length-1,m=P(t).gender==='m';
+  const side=a>=1?P(pe[1]).gender:null;
+  const gp=()=>side==='m'?(m?'ปู่':'ย่า'):(m?'ตา':'ยาย');
+  if(b===0){
+    const w=pe.slice(1).map(up);
+    const term=a===1?(m?'พ่อ':'แม่'):a===2?gp():a===3?gp()+'ทวด':a===4?'เทียด':'บรรพบุรุษ';
+    return {term,desc:a>1?chain(w):'',kind:a===1?'parent':'grand',side};
+  }
+  if(a===0){
+    const w=pt.slice(0,b).reverse().map(down);
+    const term=b===1?(m?'ลูกชาย':'ลูกสาว'):b===2?(m?'หลานชาย':'หลานสาว'):b===3?'เหลน':b===4?'โหลน':'ผู้สืบสกุล';
+    return {term,desc:b>1?chain(w):'',kind:b===1?'child':'niece'};
+  }
+  const ce=pe[a-1],ct=pt[b-1],sen=senior(ct,ce);
+  const w=[...pe.slice(1,a).map(up),sibWord(ct,ce),...pt.slice(0,b-1).reverse().map(down)];
+  const desc=chain(w),gap=a-b;let term,kind,extra='';
+  if(gap===0){
+    if(a===1){term=sen<0?(m?'พี่ชาย':'พี่สาว'):sen>0?(m?'น้องชาย':'น้องสาว'):(m?'พี่/น้องชาย':'พี่/น้องสาว');kind='sibling';
+      const pa=parentsOf(P(e)),pb=parentsOf(P(t));if(pa.length===2&&pb.length===2&&!(pa[0]===pb[0]&&pa[1]===pb[1]))extra='พี่น้องต่างพ่อหรือต่างแม่';
+      return {term,desc:extra,kind,sen};}
+    term=sen<0?'พี่':sen>0?'น้อง':'พี่/น้อง';kind='cousin';
+    extra=a===2?'ลูกพี่ลูกน้อง':'ญาติรุ่นเดียวกัน';
+    if(sen!==0)extra+=' · นับตามลำดับของพ่อแม่ ไม่ใช่อายุ';
+  }else if(gap===1){
+    term=sen<0?(m?'ลุง':'ป้า'):sen>0?(side==='m'?'อา':'น้า'):(m?'ลุง/'+(side==='m'?'อา':'น้า'):'ป้า/'+(side==='m'?'อา':'น้า'));kind='uncle';
+  }else if(gap===2){term=gp();kind='grand';}
+  else if(gap>=3){term=gp()+'ทวด';kind='grand';}
+  else if(gap===-1){term=m?'หลานชาย':'หลานสาว';kind='niece';}
+  else if(gap===-2){term='เหลน';kind='niece';}
+  else {term='โหลน';kind='niece';}
+  return {term,desc:extra?`${desc} (${extra})`:desc,kind,sen,side};
+}
+function kinship(e,t){
+  if(!e||!t||!P(e)||!P(t))return null;
+  if(e===t)return {term:'ฉัน',desc:''};
+  const b=blood(e,t);if(b)return b;
+  const T=P(t),m=T.gender==='m',E=P(e);
+  if(spousesOf(E).includes(t))return {term:m?'สามี':'ภรรยา',desc:''};
+  for(const s of spousesOf(T)){
+    const r=blood(e,s);if(!r)continue;
+    const who=(m?'สามี':'ภรรยา')+'ของ'+(r.desc&&!r.desc.includes('(')?r.desc:r.term);let term;
+    if(r.kind==='uncle')term=r.term.startsWith('ลุง')||r.term.startsWith('ป้า')?(m?'ลุง':'ป้า'):r.term;
+    else if(r.kind==='sibling')term=(r.sen<0?'พี่':r.sen>0?'น้อง':'พี่/น้อง')+(m?'เขย':'สะใภ้');
+    else if(r.kind==='cousin')term=r.term;
+    else if(r.kind==='child')term=m?'ลูกเขย':'ลูกสะใภ้';
+    else if(r.kind==='niece')term=m?'หลานเขย':'หลานสะใภ้';
+    else if(r.kind==='parent')term=m?'พ่อเลี้ยง':'แม่เลี้ยง';
+    else if(r.kind==='grand')term=m?(r.side==='m'?'ปู่':'ตา'):(r.side==='m'?'ย่า':'ยาย');
+    else term='คู่สมรสของ'+r.term;
+    return {term,desc:who};
+  }
+  for(const sp of spousesOf(E)){
+    const r=blood(sp,t);if(!r)continue;
+    const spw=P(sp).gender==='m'?'สามี':'ภรรยา';let term=r.term;
+    if(r.kind==='parent')term=E.gender==='m'?(m?'พ่อตา':'แม่ยาย'):(m?'พ่อสามี':'แม่สามี');
+    return {term,desc:`${r.desc&&!r.desc.includes('(')?r.desc:r.term}ของ${spw}`};
+  }
+  return {term:'ญาติ',desc:'เกี่ยวดองกันทางอื่น'};
+}
+
+/* ---------- จัดวางต้นไม้ ---------- */
+function layout(){
+  indexKids();
+  const g=new Map(),comp=new Map(),cmin=new Map();let ci=0;
+  for(const id of S.people.keys()){if(g.has(id))continue;ci++;g.set(id,0);comp.set(id,ci);const q=[id];
+    while(q.length){const c=q.shift(),p=P(c),v=g.get(c);
+      const nb=[...parentsOf(p).map(x=>[x,v-1]),...kidsOf(c).map(x=>[x,v+1]),...spousesOf(p).map(x=>[x,v])];
+      for(const [x,gv] of nb)if(!g.has(x)){g.set(x,gv);comp.set(x,ci);q.push(x);}}}
+  for(const [id,v] of g){const c=comp.get(id);cmin.set(c,Math.min(cmin.get(c)??v,v));}
+  const depth=id=>g.get(id)-cmin.get(comp.get(id));
+  const placed=new Set(),isRoot=id=>parentsOf(P(id)).length===0;
+  function mk(id,d){
+    placed.add(id);const m=[id];
+    for(const s of spousesOf(P(id)))if(!placed.has(s)&&isRoot(s)){m.push(s);placed.add(s);}
+    m.sort((x,y)=>(P(x).gender==='m'?0:1)-(P(y).gender==='m'?0:1));
+    const ks=new Set();m.forEach(x=>kidsOf(x).forEach(k=>ks.add(k)));
+    const u={m,d,kids:[]};
+    for(const k of sortKids([...ks]))if(!placed.has(k))u.kids.push(mk(k,d+1));
+    return u;
+  }
+  const roots=[...S.people.keys()].filter(isRoot).sort((a,b)=>g.get(a)-g.get(b)||(P(a).birthYear||9999)-(P(b).birthYear||9999));
+  const trees=[];
+  for(const r of roots){if(placed.has(r))continue;const sp=spousesOf(P(r));if(sp.length&&sp.every(s=>!isRoot(s)))continue;trees.push(mk(r,depth(r)));}
+  for(const id of S.people.keys())if(!placed.has(id))trees.push(mk(id,depth(id)));
+  const meas=u=>{const own=u.m.length*W+(u.m.length-1)*CG;u.kids.forEach(meas);u.kw=u.kids.reduce((s,k)=>s+k.w,0)+Math.max(0,u.kids.length-1)*KG;u.own=own;u.w=Math.max(own,u.kw);};
+  const pos=new Map(),units=[];
+  const place=(u,x)=>{units.push(u);let kx=x+(u.w-u.kw)/2;u.kids.forEach(k=>{place(k,kx);kx+=k.w+KG;});
+    let mx=x+(u.w-u.own)/2;if(u.kids.length){const c0=u.kids[0],cl=u.kids[u.kids.length-1];const kc=(c0.cx+cl.cx)/2;mx=Math.max(x,Math.min(x+u.w-u.own,kc-u.own/2));}
+    u.m.forEach((id,i)=>pos.set(id,{x:mx+i*(W+CG),y:PAD+u.d*(H+RG)}));u.cx=mx+u.own/2;u.y=PAD+u.d*(H+RG);};
+  let x=PAD;for(const t of trees){meas(t);place(t,x);x+=t.w+TG;}
+  let maxY=0;for(const p of pos.values())maxY=Math.max(maxY,p.y);
+  return {pos,units,w:x-TG+PAD,h:maxY+H+PAD};
+}
+
+/* ---------- render ---------- */
+const $=id=>document.getElementById(id);
+let L=null;
+const canEdit=()=>S.mode==='demo'||S.editing;
+function render(){renderTree();renderEgo();renderBanner();renderPanel();}
+function renderTree(){
+  const inner=$('inner'),msg=$('msg');
+  if(S.loadErr){inner.innerHTML='';msg.hidden=false;msg.innerHTML=`<p>${esc(S.loadErr)}</p>`;return;}
+  if(!S.people.size){inner.innerHTML='';$('sizer').style.width=$('sizer').style.height='0';msg.hidden=false;
+    msg.innerHTML=`<p>ยังไม่มีใครในผัง ${S.editing?'เริ่มจากเพิ่มตัวคุณเองทางขวา แล้วค่อยเพิ่มพ่อแม่ พี่น้อง และลูกหลาน':'ผู้ดูแลผังกด "เข้าสู่โหมดแก้ไข" เพื่อเริ่มเพิ่มรายชื่อ'}</p>`;return;}
+  msg.hidden=true;L=layout();const {pos,units}=L;
+  let path='',dash='';
+  const kidAnchor=(u,k)=>k.m.find(id=>parentsOf(P(id)).some(x=>u.m.includes(x)))||k.m[0];
+  for(const u of units){
+    for(let i=0;i<u.m.length-1;i++){const a=pos.get(u.m[i]);path+=`M${a.x+W} ${a.y+H/2}H${a.x+W+CG}`;}
+    if(!u.kids.length)continue;
+    const yb=u.y+H,mid=yb+RG/2,cs=u.kids.map(k=>pos.get(kidAnchor(u,k)).x+W/2);
+    path+=`M${u.cx} ${yb}V${mid}H${Math.min(u.cx,...cs)}H${Math.max(u.cx,...cs)}`;
+    u.kids.forEach((k,i)=>{path+=`M${cs[i]} ${mid}V${pos.get(kidAnchor(u,k)).y}`;});
+  }
+  const seen=new Set();
+  for(const u of units)for(const id of u.m)for(const s of spousesOf(P(id))){
+    const key=[id,s].sort().join();if(seen.has(key))continue;seen.add(key);
+    if(u.m.includes(s))continue;const a=pos.get(id),b=pos.get(s);if(!a||!b)continue;
+    const ax=a.x+W/2,bx=b.x+W/2,top=Math.min(a.y,b.y)-24;dash+=`M${ax} ${a.y}C${ax} ${top},${bx} ${top},${bx} ${b.y}`;
+  }
+  let html=`<svg width="${L.w}" height="${L.h}" aria-hidden="true"><path d="${path}" fill="none" stroke="var(--line)" stroke-width="1.5"/><path d="${dash}" fill="none" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="5 5"/></svg>`;
+  for(const [id,p] of pos){
+    const per=P(id),k=kinship(S.ego,id);
+    const cls=['card',id===S.sel?'sel':'',id===S.ego?'me':'',per.deathYear?'dead':''].join(' ');
+    html+=`<button class="${cls}" data-id="${esc(id)}" style="left:${p.x}px;top:${p.y}px" aria-label="${esc(label(per))}">
+      ${avatar(per)}<span class="txt">
+      <span class="term">${k?esc(k.term):'&nbsp;'}</span>
+      <span class="nm">${esc(per.nick?`${per.nick} · ${per.name.split(' ')[0]}`:per.name)}</span>
+      <span class="yr">${esc(years(per)||(per.gender==='m'?'ชาย':'หญิง'))}</span></span></button>`;
+  }
+  inner.innerHTML=html;applyZoom();
+}
+function applyZoom(){if(!L)return;$('inner').style.transform=`scale(${S.zoom})`;$('sizer').style.width=L.w*S.zoom+'px';$('sizer').style.height=L.h*S.zoom+'px';}
+function centerOn(id){if(!L||!L.pos.get(id))return;const p=L.pos.get(id),st=$('stage');st.scrollTo({left:(p.x+W/2)*S.zoom-st.clientWidth/2,top:(p.y+H/2)*S.zoom-st.clientHeight/2,behavior:'smooth'});}
+function renderEgo(){
+  const list=[...S.people.values()].sort((a,b)=>a.name.localeCompare(b.name,'th'));
+  $('ego').innerHTML=`<option value="">— เลือกตัวคุณ —</option>`+list.map(p=>`<option value="${esc(p.id)}"${p.id===S.ego?' selected':''}>${esc(label(p))}</option>`).join('');
+}
+function renderBanner(){
+  const b=$('banner');b.classList.remove('quiet');
+  if(S.mode==='demo'){b.hidden=false;b.innerHTML=`<p><b>นี่คือตระกูลตัวอย่าง</b> เว็บยังไม่ได้เชื่อมกับ Google Sheet ทำตามชีต "วิธีติดตั้ง" ในไฟล์ Excel แล้วใส่ลิงก์ในไฟล์ index.html ลองกดที่แต่ละคนเพื่อดูคำเรียกจากมุมของ "แพร" ได้เลย การแก้ไขในตัวอย่างจะไม่ถูกบันทึก</p>`;}
+  else if(S.loadErr){b.hidden=true;}
+  else if(S.editing){b.hidden=false;b.classList.add('quiet');b.innerHTML=`<p>กำลังอยู่ในโหมดแก้ไข ทุกการเปลี่ยนแปลงจะบันทึกให้ญาติทุกคนเห็น</p><button class="btn" data-act="exitedit">ออกจากโหมดแก้ไข</button>`;}
+  else if(S.editPrompt){b.hidden=false;b.classList.add('quiet');b.innerHTML=`<form id="editform"><label class="field" for="editcode"><span>รหัสแก้ไข</span><input id="editcode" autocomplete="off" required></label>
+    <button class="btn primary" type="submit">เข้าสู่โหมดแก้ไข</button><button class="btn" type="button" data-act="canceledit">ยกเลิก</button>
+    <p class="err" id="editerr" hidden>รหัสแก้ไขไม่ถูกต้อง</p></form>`;$('editcode').focus();}
+  else{b.hidden=false;b.classList.add('quiet');b.innerHTML=`<p>ดูผังได้อย่างเดียว ถ้าได้รับรหัสแก้ไขจากผู้ดูแล กดปุ่มนี้เพื่อเพิ่มหรือแก้ข้อมูลญาติ</p><button class="btn" data-act="askedit">เข้าสู่โหมดแก้ไข</button>`;}
+  $('title').textContent=S.familyName||'ผังสายสกุล';document.title=S.familyName||'ผังสายสกุล';
+  $('sub').textContent=S.mode==='demo'?'ตัวอย่าง: ตระกูลศรีสวัสดิ์ และตระกูลใจงาม':`${S.people.size} คนในผัง · รวมรายชื่อญาติพร้อมคำเรียกแบบไทย`;
+}
+
+function renderPanel(){
+  const el=$('panel'),pn=S.panel;
+  if(pn.t==='form')return renderForm(el);
+  if(pn.t==='del')return renderDel(el);
+  const p=P(S.sel);
+  if(!p){
+    el.innerHTML=S.people.size?`<div class="empty"><h2>เลือกญาติในผัง</h2><p>กดที่การ์ดของแต่ละคนเพื่อดูรายละเอียด คำเรียก และเพิ่มญาติต่อจากคนนั้น</p></div>`
+      :`<div class="empty"><h2>เริ่มผังสายสกุล</h2><p>เพิ่มตัวคุณเองเป็นคนแรก แล้วต่อยอดไปหาพ่อแม่ ปู่ย่าตายาย พี่น้อง และลูกหลาน</p>${canEdit()?'<div class="row"><button class="btn primary" data-act="addself">เพิ่มตัวฉัน</button></div>':''}</div>`;
+    return;
+  }
+  const k=kinship(S.ego,p.id);
+  const chips=ids=>ids.length?`<div class="rel">${ids.map(i=>`<button class="chip" data-go="${esc(i)}">${esc(label(P(i)))}</button>`).join('')}</div>`:'<span class="empty">—</span>';
+  const sibs=[...new Set(parentsOf(p).flatMap(kidsOf))].filter(i=>i!==p.id);
+  const others=[...S.people.values()].filter(x=>x.id!==p.id&&!spousesOf(p).includes(x.id));
+  const ph=canEdit()?`<div class="photo-actions">
+      <label class="btn filebtn" for="ph-file">${photoSrc(p)?'เปลี่ยนรูป':'ใส่รูป'}<input type="file" id="ph-file" accept="image/*"></label>
+      ${photoSrc(p)?'<button class="btn" data-act="rmphoto">เอารูปออก</button>':''}
+      <p class="err" id="ph-err" hidden></p></div>`:'';
+  el.innerHTML=`<div class="photo-row" style="margin-bottom:12px">${avatar(p,true)}${ph}</div>
+  <h2>${esc(p.name)}${p.nick?` <span style="color:var(--muted);font-weight:500">(${esc(p.nick)})</span>`:''}</h2>
+  ${k?`<div class="kin"><b>${esc(k.term)}</b>${k.term!=='ฉัน'?`<small>${esc(k.desc||'')}${S.ego?` · มองจาก ${esc(short(P(S.ego)))}`:''}</small>`:'<small>คำเรียกในผังคิดจากมุมของคุณ</small>'}</div>`:`<p class="note">เลือก "ตัวคุณ" ที่ช่องด้านบน เพื่อดูว่าควรเรียกแต่ละคนว่าอะไร</p>`}
+  ${k&&k.term.includes('/')?'<p class="note">ใส่ปีเกิดหรือลำดับในพี่น้อง เพื่อระบุว่าเป็นพี่หรือน้อง</p>':''}
+  <dl>
+    <dt>เพศ</dt><dd>${p.gender==='m'?'ชาย':'หญิง'}</dd>
+    ${p.birthYear?`<dt>เกิด</dt><dd>พ.ศ. ${p.birthYear}${p.deathYear?'':` (อายุ ${NOW_BE-p.birthYear} ปี)`}</dd>`:''}
+    ${p.deathYear?`<dt>ถึงแก่กรรม</dt><dd>พ.ศ. ${p.deathYear}${p.birthYear?` (อายุ ${p.deathYear-p.birthYear} ปี)`:''}</dd>`:''}
+    ${p.birthOrder?`<dt>ลำดับ</dt><dd>บุตรคนที่ ${p.birthOrder}</dd>`:''}
+    ${p.place?`<dt>ภูมิลำเนา</dt><dd>${esc(p.place)}</dd>`:''}
+    ${p.note?`<dt>บันทึก</dt><dd>${esc(p.note)}</dd>`:''}
+  </dl>
+  <h3>พ่อแม่</h3>${chips(parentsOf(p))}
+  <h3>คู่สมรส</h3>${chips(spousesOf(p))}
+  <h3>พี่น้อง</h3>${chips(sortKids(sibs))}
+  <h3>ลูก</h3>${chips(sortKids([...kidsOf(p.id)]))}
+  ${canEdit()?`<h3>เพิ่มญาติของ ${esc(short(p))}</h3>
+  <div class="add">
+    ${p.fatherId?'':'<button class="btn" data-add="father">+ พ่อ</button>'}
+    ${p.motherId?'':'<button class="btn" data-add="mother">+ แม่</button>'}
+    <button class="btn" data-add="spouse">+ คู่สมรส</button>
+    <button class="btn" data-add="child">+ ลูก</button>
+    <button class="btn" data-add="sibling" ${parentsOf(p).length?'':'disabled'}>+ พี่น้อง</button>
+  </div>
+  ${parentsOf(p).length?'':'<p class="note">ต้องมีพ่อหรือแม่ก่อนจึงเพิ่มพี่น้องได้</p>'}
+  ${others.length?`<div class="row" style="align-items:end"><label class="field" style="flex:1 1 180px" for="linksp"><span>เชื่อมคู่สมรสกับคนที่อยู่ในผังแล้ว</span>
+    <select id="linksp"><option value="">— เลือก —</option>${others.map(x=>`<option value="${esc(x.id)}">${esc(label(x))}</option>`).join('')}</select></label>
+    <button class="btn" data-act="linksp">เชื่อม</button></div>`:''}
+  <div class="row">
+    <button class="btn" data-act="edit">แก้ไขข้อมูล</button>
+    ${S.ego!==p.id?'<button class="btn" data-act="me">นี่คือฉัน</button>':''}
+    <button class="btn danger" data-act="del">ลบ</button>
+  </div>`:(S.ego!==p.id?'<div class="row"><button class="btn" data-act="me">นี่คือฉัน</button></div>':'')}`;
+}
+
+const REL={self:'เพิ่มตัวฉัน',father:'เพิ่มพ่อของ',mother:'เพิ่มแม่ของ',spouse:'เพิ่มคู่สมรสของ',child:'เพิ่มลูกของ',sibling:'เพิ่มพี่น้องของ'};
+function renderForm(el){
+  const f=S.panel,p=f.id?P(f.id):{},of=f.of?P(f.of):null;
+  const g=f.rel==='father'?'m':f.rel==='mother'?'f':(p.gender||(f.rel==='spouse'&&of?(of.gender==='m'?'f':'m'):''));
+  const lock=f.rel==='father'||f.rel==='mother';
+  const title=f.id?`แก้ไขข้อมูล ${esc(short(p))}`:f.rel==='self'?REL.self:`${REL[f.rel]} ${esc(short(of))}`;
+  const opts=(gen,cur)=>`<option value="">— ไม่ระบุ —</option>`+[...S.people.values()].filter(x=>x.gender===gen&&x.id!==f.id).map(x=>`<option value="${esc(x.id)}"${x.id===cur?' selected':''}>${esc(label(x))}</option>`).join('');
+  let other='';
+  if(f.rel==='child'&&of){const sp=spousesOf(of);if(sp.length)other=`<label class="field" for="f-other"><span>${of.gender==='m'?'แม่':'พ่อ'}ของลูก</span><select id="f-other">${sp.map(s=>`<option value="${esc(s)}">${esc(label(P(s)))}</option>`).join('')}<option value="">— ไม่ระบุ —</option></select></label>`;}
+  el.innerHTML=`<h2>${title}</h2>
+  <form id="pform" novalidate>
+    ${f.id?'':`<div class="field"><span>รูป (ไม่บังคับ)</span><div class="photo-row">
+      <span class="av" id="f-prev" aria-hidden="true">+</span>
+      <label class="btn filebtn" for="f-photo">เลือกรูป<input type="file" id="f-photo" accept="image/*"></label></div></div>`}
+    <label class="field" for="f-name"><span>ชื่อ-นามสกุล</span><input id="f-name" required value="${esc(p.name)}" placeholder="เช่น สมศรี ใจดี"></label>
+    <div class="two">
+      <label class="field" for="f-nick"><span>ชื่อเล่น</span><input id="f-nick" value="${esc(p.nick)}"></label>
+      <div class="field"><span>เพศ</span><div class="radio">
+        <label><input type="radio" name="g" id="f-gm" value="m" ${g==='m'?'checked':''} ${lock&&g!=='m'?'disabled':''}>ชาย</label>
+        <label><input type="radio" name="g" id="f-gf" value="f" ${g==='f'?'checked':''} ${lock&&g!=='f'?'disabled':''}>หญิง</label></div></div>
+    </div>
+    <div class="two">
+      <label class="field" for="f-by"><span>ปีเกิด (พ.ศ.)</span><input id="f-by" inputmode="numeric" value="${esc(p.birthYear)}" placeholder="2530"></label>
+      <label class="field" for="f-dy"><span>ปีที่ถึงแก่กรรม (พ.ศ.)</span><input id="f-dy" inputmode="numeric" value="${esc(p.deathYear)}" placeholder="ยังมีชีวิตอยู่"></label>
+    </div>
+    <div class="two">
+      <label class="field" for="f-bo"><span>เป็นลูกคนที่</span><input id="f-bo" inputmode="numeric" value="${esc(p.birthOrder)}" placeholder="1"></label>
+      <label class="field" for="f-pl"><span>ภูมิลำเนา</span><input id="f-pl" value="${esc(p.place)}"></label>
+    </div>
+    <p class="hint">ลำดับในพี่น้องและปีเกิดใช้ตัดสินว่าเป็นพี่หรือน้อง ลุงหรืออา ใส่ปี ค.ศ. ได้ ระบบจะแปลงเป็น พ.ศ. ให้</p>
+    ${other}
+    ${f.id?`<div class="two">
+      <label class="field" for="f-fa"><span>พ่อ</span><select id="f-fa">${opts('m',p.fatherId)}</select></label>
+      <label class="field" for="f-mo"><span>แม่</span><select id="f-mo">${opts('f',p.motherId)}</select></label></div>`:''}
+    <label class="field" for="f-note"><span>บันทึก</span><textarea id="f-note" placeholder="อาชีพ เรื่องเล่า หรือสิ่งที่อยากให้ลูกหลานรู้">${esc(p.note)}</textarea></label>
+    <p class="err" id="f-err" hidden></p>
+    <div class="row" style="margin-top:4px"><button class="btn primary" type="submit">บันทึก</button><button class="btn" type="button" data-act="cancel">ยกเลิก</button></div>
+  </form>`;
+  $('f-name').focus();
+}
+function renderDel(el){
+  const p=P(S.panel.id);
+  el.innerHTML=`<h2>ลบ ${esc(label(p))} ออกจากผัง?</h2><p>ความเชื่อมโยงกับพ่อแม่ คู่สมรส และลูกของคนนี้จะถูกตัดออกด้วย ลบแล้วกู้คืนไม่ได้</p>
+  <div class="row"><button class="btn danger solid" data-act="delyes">ลบ</button><button class="btn" data-act="cancel">ยกเลิก</button></div>`;
+}
+
+/* ---------- ฐานข้อมูล (Google Sheet ผ่าน Apps Script) ---------- */
+async function api(action,payload){
+  const r=await fetch(CFG.SHEET_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...payload})});
+  if(!r.ok)throw new Error('http_'+r.status);
+  return await r.json();
+}
+function dbErr(e){const m=String(e&&e.message||e||'');
+  if(m.includes('bad_code'))return 'รหัสแก้ไขไม่ถูกต้องหรือถูกเปลี่ยนแล้ว ออกจากโหมดแก้ไขแล้วใส่รหัสใหม่';
+  return 'บันทึกไม่สำเร็จ ตรวจการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง';}
+async function putMany(list){
+  for(const p of list)S.people.set(p.id,p);
+  if(S.mode!=='real')return;
+  const r=await api('save',{code:S.editCode,items:list});
+  if(!r.ok)throw new Error(r.error||'save_failed');
+}
+async function remove(id){
+  S.people.delete(id);
+  if(S.mode!=='real')return;
+  const r=await api('delete',{code:S.editCode,id});
+  if(!r.ok)throw new Error(r.error||'delete_failed');
+}
+async function checkEdit(code){try{const r=await api('check',{code});return !!(r.ok&&r.valid);}catch(e){return false;}}
+async function load(){
+  let data;
+  try{data=await api('get',{code:S.viewCode||''});}catch(e){data=null;}
+  if(!data||(!data.ok&&data.reason!=='view_code')){S.loadErr='เชื่อมต่อ Google Sheet ไม่ได้ ตรวจว่าลิงก์ใน index.html ถูกต้อง และตั้ง Web app ให้ "Anyone" เข้าถึงได้ แล้วโหลดหน้านี้ใหม่';return 'error';}
+  if(!data.ok)return 'gate';
+  S.loadErr=null;S.familyName=data.name||'';
+  S.people=new Map((data.people||[]).map(p=>[p.id,{...p,spouseIds:[...(p.spouseIds||[])]}]));
+  if(S.ego&&!S.people.has(S.ego))S.ego=null;if(S.sel&&!S.people.has(S.sel))S.sel=null;
+  return 'ok';
+}
+const yr=v=>{v=parseInt(String(v).replace(/[^\d]/g,''),10);if(!v)return undefined;return v<2300?v+543:v;};
+
+async function submitForm(e){
+  e.preventDefault();
+  const f=S.panel,err=$('f-err');
+  const name=$('f-name').value.trim(),gv=document.querySelector('input[name=g]:checked')?.value;
+  if(!name||!gv){err.hidden=false;err.textContent=!name?'ใส่ชื่อก่อนบันทึก':'เลือกเพศ ระบบใช้เพศในการคำนวณคำเรียกญาติ';return;}
+  const base=f.id?{...P(f.id)}:{id:newId(),spouseIds:[]};
+  Object.assign(base,{name,gender:gv,nick:$('f-nick').value.trim()||undefined,birthYear:yr($('f-by').value),deathYear:yr($('f-dy').value),
+    birthOrder:parseInt($('f-bo').value,10)||undefined,place:$('f-pl').value.trim()||undefined,note:$('f-note').value.trim()||undefined});
+  const sub=e.target.querySelector('[type=submit]');sub.disabled=true;
+  if(f.file){try{base.photo=await shrink(f.file);}catch(x){err.hidden=false;err.textContent=photoErr(x)+' หรือบันทึกโดยไม่ใส่รูป';f.file=null;sub.disabled=false;return;}}
+  try{
+    const writes=[];
+    if(f.id){base.fatherId=$('f-fa').value||undefined;base.motherId=$('f-mo').value||undefined;writes.push(base);}
+    else{
+      const of=f.of?{...P(f.of),spouseIds:[...(P(f.of).spouseIds||[])]}:null;
+      if(f.rel==='father'||f.rel==='mother'){
+        of[f.rel==='father'?'fatherId':'motherId']=base.id;
+        const otherId=f.rel==='father'?of.motherId:of.fatherId;
+        if(otherId&&P(otherId)){const o={...P(otherId),spouseIds:[...(P(otherId).spouseIds||[]),base.id]};base.spouseIds.push(otherId);writes.push(base,of,o);}
+        else writes.push(base,of);
+      }else if(f.rel==='spouse'){base.spouseIds.push(of.id);of.spouseIds.push(base.id);writes.push(base,of);}
+      else if(f.rel==='child'){
+        base[of.gender==='m'?'fatherId':'motherId']=of.id;
+        const o=$('f-other')?.value;if(o)base[of.gender==='m'?'motherId':'fatherId']=o;writes.push(base);
+      }else if(f.rel==='sibling'){base.fatherId=of.fatherId;base.motherId=of.motherId;writes.push(base);}
+      else writes.push(base);
+    }
+    await putMany(writes);
+    if(f.rel==='self'||!S.ego){S.ego=base.id;if(S.mode==='real')store('kin-ego',base.id);}
+    S.sel=base.id;S.panel={t:'view'};render();centerOn(base.id);
+  }catch(x){sub.disabled=false;err.hidden=false;err.textContent=dbErr(x);if(S.mode==='real')refresh();}
+}
+async function delPerson(id){
+  try{
+    const changed=[];
+    for(const p of S.people.values()){
+      if(p.id===id)continue;
+      if(p.fatherId===id||p.motherId===id||(p.spouseIds||[]).includes(id)){
+        const n={...p,spouseIds:(p.spouseIds||[]).filter(s=>s!==id)};if(n.fatherId===id)delete n.fatherId;if(n.motherId===id)delete n.motherId;changed.push(n);}
+    }
+    if(changed.length)await putMany(changed);
+    await remove(id);if(S.ego===id)S.ego=null;S.sel=null;S.panel={t:'view'};render();
+  }catch(x){S.panel={t:'view'};await refresh();}
+}
+async function refresh(){if(S.mode!=='real')return;const r=await load();if(r==='ok'&&S.panel.t!=='form')render();else if(r==='ok'){renderTree();renderEgo();renderBanner();}else if(r==='error')render();}
+
+/* ---------- events ---------- */
+document.addEventListener('click',async e=>{
+  const c=e.target.closest('.card');if(c){S.sel=c.dataset.id;S.panel={t:'view'};render();if(innerWidth<=860)$('panel').scrollIntoView({behavior:'smooth',block:'start'});return;}
+  const go=e.target.closest('[data-go]');if(go){$('results').hidden=true;S.sel=go.dataset.go;S.panel={t:'view'};render();centerOn(S.sel);return;}
+  const add=e.target.closest('[data-add]');if(add&&!add.disabled){S.panel={t:'form',rel:add.dataset.add,of:S.sel};renderPanel();return;}
+  const a=e.target.closest('[data-act]');if(!a)return;
+  const act=a.dataset.act;
+  if(act==='addself')S.panel={t:'form',rel:'self'};
+  else if(act==='edit')S.panel={t:'form',id:S.sel};
+  else if(act==='cancel')S.panel={t:'view'};
+  else if(act==='del')S.panel={t:'del',id:S.sel};
+  else if(act==='delyes')return delPerson(S.panel.id);
+  else if(act==='me'){S.ego=S.sel;if(S.mode==='real')store('kin-ego',S.ego);}
+  else if(act==='askedit')S.editPrompt=true;
+  else if(act==='canceledit')S.editPrompt=false;
+  else if(act==='exitedit'){S.editing=false;S.editCode=null;store('kin-edit',null);S.panel={t:'view'};}
+  else if(act==='rmphoto'){const n={...P(S.sel)};delete n.photo;try{await putMany([n]);}catch(x){await refresh();}}
+  else if(act==='linksp'){const v=$('linksp').value;if(!v)return;const A=P(S.sel),B=P(v);
+    try{await putMany([{...A,spouseIds:[...new Set([...(A.spouseIds||[]),v])]},{...B,spouseIds:[...new Set([...(B.spouseIds||[]),A.id])]}]);}catch(x){await refresh();}}
+  render();
+});
+document.addEventListener('change',async e=>{
+  if(e.target.id==='f-photo'){const file=e.target.files[0];if(!file)return;S.panel.file=file;
+    const pv=$('f-prev');pv.textContent='';const img=document.createElement('img');img.alt='';img.src=URL.createObjectURL(file);pv.appendChild(img);return;}
+  if(e.target.id==='ph-file'){const file=e.target.files[0];if(!file)return;const id=S.sel;
+    e.target.parentElement.firstChild.textContent='กำลังบันทึก…';
+    try{const photo=await shrink(file);await putMany([{...P(id),photo}]);render();}
+    catch(x){renderPanel();const er=$('ph-err');if(er){er.hidden=false;er.textContent=x&&x.code==='decode'?photoErr(x):dbErr(x);}}}
+});
+document.addEventListener('submit',async e=>{
+  if(e.target.id==='pform')return submitForm(e);
+  if(e.target.id==='editform'){e.preventDefault();const code=$('editcode').value.trim();
+    const btn=e.target.querySelector('[type=submit]');btn.disabled=true;const ok=await checkEdit(code);btn.disabled=false;
+    if(!ok){$('editerr').hidden=false;return;}
+    S.editCode=code;S.editing=true;S.editPrompt=false;store('kin-edit',code);render();return;}
+  if(e.target.id==='gateform'){e.preventDefault();S.viewCode=$('gatecode').value.trim();
+    const r=await load();if(r==='gate'){$('gateerr').hidden=false;return;}
+    store('kin-view',S.viewCode);$('gate').hidden=true;$('app').hidden=false;afterLoad();}
+});
+$('ego').addEventListener('change',e=>{S.ego=e.target.value||null;if(S.mode==='real')store('kin-ego',S.ego);render();});
+$('q').addEventListener('input',e=>{
+  const q=e.target.value.trim().toLowerCase(),r=$('results');
+  if(!q){r.hidden=true;return;}
+  const hits=[...S.people.values()].filter(p=>(p.name+' '+(p.nick||'')).toLowerCase().includes(q)).slice(0,6);
+  r.hidden=false;r.innerHTML=hits.length?hits.map(p=>`<button data-go="${esc(p.id)}">${esc(label(p))}</button>`).join(''):'<button disabled>ไม่พบชื่อนี้</button>';
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))$('results').hidden=true;});
+$('zin').onclick=()=>{S.zoom=Math.min(1.6,S.zoom+.15);applyZoom();};
+$('zout').onclick=()=>{S.zoom=Math.max(.4,S.zoom-.15);applyZoom();};
+(()=>{const st=$('stage');let d=null;
+  st.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.target.closest('.card'))return;d={x:e.clientX,y:e.clientY,l:st.scrollLeft,t:st.scrollTop};st.classList.add('drag');});
+  addEventListener('pointermove',e=>{if(!d)return;st.scrollLeft=d.l-(e.clientX-d.x);st.scrollTop=d.t-(e.clientY-d.y);});
+  addEventListener('pointerup',()=>{d=null;st.classList.remove('drag');});})();
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();});
+setInterval(()=>{if(document.visibilityState==='visible'&&S.panel.t==='view')refresh();},60000);
+
+/* ---------- start ---------- */
+function afterLoad(){
+  const e=recall('kin-ego');S.ego=e&&S.people.has(e)?e:null;S.sel=S.ego;S.panel={t:'view'};
+  render();requestAnimationFrame(()=>centerOn(S.ego||S.people.keys().next().value));
+  const code=recall('kin-edit');
+  if(code)checkEdit(code).then(ok=>{if(ok){S.editCode=code;S.editing=true;}else store('kin-edit',null);renderBanner();renderPanel();});
+}
+(async()=>{
+  if(!CFG.SHEET_API){loadDemo();render();requestAnimationFrame(()=>centerOn(S.ego));return;}
+  S.mode='real';
+  S.viewCode=recall('kin-view')||'';
+  $('msg').hidden=false;$('msg').innerHTML='<p>กำลังโหลดผังตระกูล…</p>';
+  const r=await load();
+  if(r==='gate'){$('app').hidden=true;$('gate').hidden=false;$('gatecode').focus();return;}
+  afterLoad();
+})();
+</script>
+</body>
+</html>
