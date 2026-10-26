@@ -958,8 +958,12 @@ function clanFilterPeople(){
   if(!S.clanView)return S.people;
   const blood=S.people.filter(p=>laneOf(p)===S.clanView);
   const bloodIds=new Set(blood.map(p=>p.id));
+  // ลูกที่เกิดจากคนในตระกูล แต่ย้ายชื่อต้นตระกูลไปตามคู่สมรสแล้ว (เช่น ลูกสาวที่แต่งงานออกไป) ยังแสดงในตระกูลเดิม
+  // และคู่สมรสของเขาก็แสดงด้วย คนเดียวจึงอยู่ได้ทั้งสองตระกูล
+  const born=S.people.filter(p=>!bloodIds.has(p.id)&&(bloodIds.has(p.fatherId)||bloodIds.has(p.motherId)));
+  born.forEach(p=>bloodIds.add(p.id));
   const inLaw=S.people.filter(p=>!bloodIds.has(p.id)&&spousesOf(p.id).some(s=>bloodIds.has(s)));
-  return [...blood,...inLaw];
+  return [...blood,...born,...inLaw];
 }
 function clanMenu(show){
   const m=$('clanmenu'),btn=$('clanbtn');if(!m||!btn)return;
