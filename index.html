@@ -495,7 +495,8 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
 @media (max-width:440px){
   .cards{gap:10px}
   .card{width:156px}
-  .cell{min-width:156px;max-width:calc(2 * 156px + 12px);gap:12px}
+  .cell{min-width:156px;gap:12px} /* ไม่จำกัดความกว้าง: ถ้าจำกัด การ์ดที่เกินจะล้นไปทับช่องถัดไป และเส้นโยงเพี้ยน */
+  body.compact .cell{min-width:118px}
   .chart{column-gap:26px;row-gap:60px}
   .row-h{width:70px;padding:6px 6px}
   .row-h small{display:none}
@@ -573,6 +574,27 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
   .banner{margin-top:8px}
   .banner p{padding:7px 12px}
 }
+/* ปุ่มเมนู 3 ขีด: แท็บเล็ตแนวตั้งและมือถือ รวมปุ่มทั้งหมดไว้ในเมนู */
+.menubtn{display:none}
+@media (max-width:900px){
+  .top-in{position:relative}
+  .menubtn{display:grid;align-content:center;gap:4px;position:absolute;right:max(16px,env(safe-area-inset-right,0px));top:10px;width:40px;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--raised);cursor:pointer;z-index:3}
+  .menubtn span{display:block;height:2px;border-radius:2px;background:var(--ink);transition:transform .2s,opacity .2s}
+  .menuopen .menubtn{border-color:var(--accent);background:var(--accent-soft)}
+  .menuopen .menubtn span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+  .menuopen .menubtn span:nth-child(2){opacity:0}
+  .menuopen .menubtn span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+  .top-in .brand{padding-inline:48px}
+  .top-in .acct{display:none!important}
+  .menuopen .top-in .acct{display:flex!important;position:absolute;z-index:30;top:56px;right:max(12px,env(safe-area-inset-right,0px));left:auto;width:min(280px,calc(100vw - 24px));margin:0;padding:10px;flex-direction:column;align-items:stretch;gap:6px;overflow:visible;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px var(--shadow)}
+  .menuopen .acct .who{flex-direction:column;align-items:stretch;gap:6px;flex-wrap:nowrap}
+  .menuopen .acct .fab{justify-content:center;height:40px}
+  .menuopen .acct .who .btn{height:40px;justify-content:center;width:100%;font-size:.9rem}
+  .menuopen .acct .who .addopt{display:block;position:relative}
+  .menuopen .acct .who .optmenu{position:static;margin-top:4px;box-shadow:none;width:100%}
+  .menuopen .acct .who>span:not(.addopt){text-align:center;font-size:.85rem}
+  .menuopen .acct .who .role{align-self:center}
+}
 </style>
 </head>
 <body>
@@ -600,8 +622,9 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
         <div class="clanmenu" id="clanmenu" role="menu" hidden></div></span>
       </span>
     </div>
+    <button class="menubtn" id="menubtn" type="button" aria-label="เมนู" aria-expanded="false" aria-controls="acct"><span></span><span></span><span></span></button>
     <div class="brand"><h1>ผังเครือญาติ</h1><p id="sub">กำลังโหลด…</p></div>
-    <div class="acct">
+    <div class="acct" id="acct">
       <button class="fab" id="fab" hidden aria-label="เพิ่มญาติ">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">เพิ่มญาติ</span>
   </button>
@@ -1987,6 +2010,19 @@ $('gatex').onclick=hideLogin;
 $('gate').addEventListener('click',e=>{if(e.target.id==='gate'&&$('gate').classList.contains('pop'))hideLogin();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('gate').classList.contains('pop')&&!$('gate').hidden)hideLogin();});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();});
+
+/* ---------- เมนู 3 ขีด ---------- */
+function setMenu(open){document.body.classList.toggle('menuopen',open);$('menubtn').setAttribute('aria-expanded',String(open));}
+$('menubtn').addEventListener('click',e=>{e.stopPropagation();setMenu(!document.body.classList.contains('menuopen'));});
+document.addEventListener('click',e=>{
+  if(!document.body.classList.contains('menuopen'))return;
+  if(e.target.closest('#menubtn'))return;
+  // กดปุ่มในเมนูแล้วปิดเมนู ยกเว้นปุ่มเปิดเมนูย่อย "เพิ่มข้อมูล"
+  if(e.target.closest('#acct')){if(e.target.closest('[data-act=optmenu]'))return;if(e.target.closest('button'))setTimeout(()=>setMenu(false),0);return;}
+  setMenu(false);
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('menuopen'))setMenu(false);});
+addEventListener('resize',()=>{if(innerWidth>900)setMenu(false);});
 
 /* ---------- start ---------- */
 setCompact(recall('rel-view')==='2');
