@@ -960,8 +960,10 @@ function clanFilterPeople(){
   const bloodIds=new Set(blood.map(p=>p.id));
   // ลูกที่เกิดจากคนในตระกูล แต่ย้ายชื่อต้นตระกูลไปตามคู่สมรสแล้ว (เช่น ลูกสาวที่แต่งงานออกไป) ยังแสดงในตระกูลเดิม
   // และคู่สมรสของเขาก็แสดงด้วย คนเดียวจึงอยู่ได้ทั้งสองตระกูล
-  const born=S.people.filter(p=>!bloodIds.has(p.id)&&(bloodIds.has(p.fatherId)||bloodIds.has(p.motherId)));
-  born.forEach(p=>bloodIds.add(p.id));
+  // รวมลูกหลานทุกชั้นของคนในตระกูลด้วย (เช่น ลูกของแก้วกับพี) วนจนไม่มีใครเพิ่ม
+  const born=[];
+  for(let grew=true;grew;){grew=false;
+    for(const p of S.people)if(!bloodIds.has(p.id)&&(bloodIds.has(p.fatherId)||bloodIds.has(p.motherId))){bloodIds.add(p.id);born.push(p);grew=true;}}
   const inLaw=S.people.filter(p=>!bloodIds.has(p.id)&&spousesOf(p.id).some(s=>bloodIds.has(s)));
   return [...blood,...born,...inLaw];
 }
