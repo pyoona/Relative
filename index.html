@@ -403,9 +403,11 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
 .form .hint{font-size:.72rem;line-height:1.4}
 .form .mrows{gap:6px}
 .form .mrow .rm{width:26px;height:30px}
-.form .mrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 26px}
-.form .mrow.sp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 120px 26px}
-.form .mrow.sb{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 140px 26px}
+.form .mrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 120px 26px}
+.form .mrow.sp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 120px 120px 26px}
+.form .mrow.sb{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 140px 120px 26px}
+.form .grid.pst{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 120px 26px}
+.form .mrow .m-life{width:100%}
 .form .btn.sm{padding:3px 10px;font-size:.78rem}
 .form .subhead{font-size:.78rem;padding-top:6px}
 .form .up{gap:12px}
@@ -485,7 +487,7 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
   fieldset{padding:0 12px 14px}
   legend{width:calc(100% + 24px);margin:0 -12px 2px;padding:8px 12px}
   .grid,.grid.three,.grid.two{grid-template-columns:minmax(0,1fr)}
-  .form .grid,.form .grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .form .grid,.form .grid.four,.form .grid.pst{grid-template-columns:repeat(2,minmax(0,1fr))}
   .form .mrow,.form .mrow.sp,.form .mrow.sb{grid-template-columns:minmax(0,1fr) 26px}
   .mrow .field{grid-column:1}
   .mrow .rm{grid-column:2;grid-row:1}
@@ -594,6 +596,31 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
   .menuopen .acct .who .optmenu{position:static;margin-top:4px;box-shadow:none;width:100%}
   .menuopen .acct .who>span:not(.addopt){text-align:center;font-size:.85rem}
   .menuopen .acct .who .role{align-self:center}
+}
+/* ฟอร์มหัวข้อ 1-8: พื้นขาว แถบหัวสีฟ้าเทาเหมือนกันทุกหัวข้อ ปุ่ม dropdown สีน้ำเงิน */
+.form fieldset,.form fieldset:nth-of-type(n){--c:#0EA5E9;--c-soft:#E0F2FE;background:#fff;border:1px solid #CDEBD6;border-left:5px solid #22A04B;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.form legend{background:#D7F2DF;color:#14532D}
+.form legend small{color:#14532D;opacity:.75}
+.form legend .n{background:#22A04B;color:#fff}
+.form #sp-rows.locked{opacity:.55;pointer-events:none}
+.form #sp-rows.locked input,.form #sp-rows.locked select{background:#F1F3F5}
+.form .btn.addrow:disabled{opacity:.45;cursor:not-allowed}
+.form .subhead.first{margin-top:2px;padding-top:0;border-top:0}
+.form input,.form select{border-color:#C9D3DF;background:#fff}
+.form input:hover,.form select:hover{border-color:#2F7BF0}
+.form input:focus,.form select:focus{border-color:#2F7BF0;outline:3px solid #DCE9FD}
+.form .combo-btn{background:#2F7BF0;color:#fff;border-left:1px solid #2F7BF0}
+.form .combo-btn:hover{background:#1F66D6}
+.form .combo input.locked{background:#EEF4FE;border-color:#2F7BF0}
+.form .btn.addrow{border-color:#2F7BF0;background:#fff}
+.form .btn.addrow:hover{background:#EEF4FE}
+.form .up .slide-pic{box-shadow:0 0 0 2px #0EA5E9}
+.form .up .pic{background:#E0F2FE}
+@media (prefers-color-scheme: dark){
+  .form fieldset,.form fieldset:nth-of-type(n){background:var(--raised);border-color:#2B4A63}
+  .form legend{background:#1F3A2A;color:#CFF5DA}
+  .form legend small{color:#CFF5DA}
+  .form input,.form select{background:var(--raised);border-color:var(--line)}
 }
 </style>
 </head>
@@ -729,7 +756,7 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
         <legend><span class="n">3</span>ข้อมูลส่วนตัว</legend>
         <div class="pgrid">
           <label class="field" for="f-nick"><span>ชื่อเล่น</span><input id="f-nick" autocomplete="off"></label>
-          <label class="field" for="f-first"><span>ชื่อจริง <b>*</b></span><span class="combo"><input id="f-first" data-combo="first" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกชื่อจริง">▾</button></span></label>
+          <label class="field" for="f-first"><span>ชื่อจริง</span><span class="combo"><input id="f-first" data-combo="first" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกชื่อจริง">▾</button></span></label>
           <label class="field" for="f-last"><span>นามสกุล</span><span class="combo"><input id="f-last" data-combo="sur" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกนามสกุล">▾</button></span></label>
           <label class="field" for="f-gender"><span>เพศ</span><select id="f-gender"><option value="">ไม่ระบุ</option><option>ชาย</option><option>หญิง</option></select></label>
           <label class="field" for="f-status"><span>สถานะภาพ</span><select id="f-status"></select></label>
@@ -743,36 +770,38 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
         <p class="hint" id="f-age-h">ใส่ปีเกิดแล้วระบบคำนวณอายุให้ ถ้าไม่ทราบวันเกิด พิมพ์อายุเองได้</p>
       </fieldset>
       <fieldset>
-        <legend><span class="n">4</span>ข้อมูลพ่อ <small>(ใส่เท่าที่ทราบ)</small></legend>
-        <div class="grid three">
+        <legend><span class="n">4</span>ข้อมูลพ่อและแม่ <small>(ใส่เท่าที่ทราบ)</small></legend>
+        <p class="subhead first">พ่อ</p>
+        <div class="grid three pst">
           <label class="field" for="f-fa-nick"><span>ชื่อเล่น</span><input id="f-fa-nick" autocomplete="off"></label>
           <label class="field" for="f-fa-first"><span>ชื่อจริง</span><span class="combo"><input id="f-fa-first" data-combo="fa" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกพ่อ">▾</button></span></label>
           <label class="field" for="f-fa-last"><span>นามสกุล</span><span class="combo"><input id="f-fa-last" data-combo="sur" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกนามสกุล">▾</button></span></label>
+          <label class="field" for="f-fa-st"><span>สถานะภาพ</span><select id="f-fa-st"></select></label>
         </div>
         <p class="hint" id="f-fa-h"></p>
-      </fieldset>
-      <fieldset>
-        <legend><span class="n">5</span>ข้อมูลแม่ <small>(ใส่เท่าที่ทราบ)</small></legend>
-        <div class="grid three">
+        <p class="subhead">แม่</p>
+        <div class="grid three pst">
           <label class="field" for="f-mo-nick"><span>ชื่อเล่น</span><input id="f-mo-nick" autocomplete="off"></label>
           <label class="field" for="f-mo-first"><span>ชื่อจริง</span><span class="combo"><input id="f-mo-first" data-combo="mo" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกแม่">▾</button></span></label>
           <label class="field" for="f-mo-last"><span>นามสกุล</span><span class="combo"><input id="f-mo-last" data-combo="sur" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกนามสกุล">▾</button></span></label>
+          <label class="field" for="f-mo-st"><span>สถานะภาพ</span><select id="f-mo-st"></select></label>
         </div>
         <p class="hint" id="f-mo-h"></p>
       </fieldset>
       <fieldset>
-        <legend><span class="n">6</span>พี่น้อง <small>(ใส่เท่าที่ทราบ)</small></legend>
+        <legend><span class="n">5</span>พี่น้อง <small>(ใส่เท่าที่ทราบ)</small></legend>
         <div class="mrows" id="sb-rows"></div>
         <button type="button" class="btn sm addrow" data-addrow="sb">+ เพิ่มพี่น้องอีกคน</button>
         <p class="hint" id="f-sb-h">เลือกจากรายชื่อในช่องชื่อจริง หรือพิมพ์ชื่อพี่น้องเอง ระบบจะเพิ่มการ์ดและโยงเส้นให้ทุกคน ช่องสถานะพี่น้องเลือกหรือพิมพ์เองได้ เช่น ต่างมารดา ต่างบิดา บุญธรรม</p>
       </fieldset>
       <fieldset>
-        <legend><span class="n">7</span>สถานภาพสมรส / คู่สมรส</legend>
+        <legend><span class="n">6</span>สถานภาพสมรส / คู่สมรส</legend>
         <div class="grid">
           <label class="field" for="f-mar"><span>สถานภาพ</span><span class="combo"><input id="f-mar" data-combo="mar" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกสถานภาพการแต่งงาน">▾</button></span></label>
         </div>
         <div class="mrows" id="sp-rows"></div>
         <button type="button" class="btn sm addrow" data-addrow="sp">+ เพิ่มคู่สมรสอีกคน</button>
+        <p class="hint sp-lock" hidden>สถานภาพเป็น "โสด" จึงล็อกช่องคู่สมรสไว้ เปลี่ยนสถานภาพก่อนจึงจะใส่คู่สมรสได้</p>
         <p class="hint">เคยแต่งงานหลายครั้ง ใส่ได้ทุกคน แล้วเลือกสถานะ: สมรส (คู่ปัจจุบัน) · หย่าร้าง · คู่สมรสเสียชีวิต</p>
         <p class="subhead">ลูก</p>
         <div class="mrows" id="ch-rows"></div>
@@ -780,7 +809,7 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
         <p class="hint" id="f-ch-h">เลือกจากรายชื่อในช่องชื่อจริง หรือพิมพ์ชื่อลูกเอง ระบบจะเพิ่มการ์ดและโยงเส้นให้ทุกคน</p>
       </fieldset>
       <fieldset>
-        <legend><span class="n">8</span>ที่อยู่ปัจจุบัน <small>(ใส่เท่าที่ทราบ)</small></legend>
+        <legend><span class="n">7</span>ที่อยู่ปัจจุบัน <small>(ใส่เท่าที่ทราบ)</small></legend>
         <div class="grid four">
           <label class="field" for="f-vil"><span>หมู่บ้าน</span><input id="f-vil" autocomplete="off" placeholder="พิมพ์ชื่อหมู่บ้าน"></label>
           <label class="field" for="f-tam"><span>ตำบล/แขวง</span><span class="combo"><input id="f-tam" data-combo="tam" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกตำบล">▾</button></span></label>
@@ -1445,10 +1474,12 @@ function fillParent(pre,listId,p,excl,filter){
   $(`f-${pre}-nick`).value=per?per.nick||'':p[key+'Nick']||'';
   $(`f-${pre}-first`).value=per?per.first||'':p[key+'First']||'';
   $(`f-${pre}-last`).value=per?per.last||'':p[key+'Last']||'';
+  $(`f-${pre}-st`).innerHTML=lifeOpts(per?per.status:'');
   parentHint(pre);
 }
 /* ---------- พี่น้อง / ลูก หลายคน ---------- */
 let tmpSeq=0;
+const lifeOpts=sel=>opts(S.lists.status,sel||'','— ไม่ระบุ —');
 const comboField=(cls,kind,lab)=>`<span class="combo"><input class="${cls}" data-combo="${kind}" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือก${lab}">▾</button></span>`;
 function buildPP(pre,excl){
   const list=S.people.filter(x=>x.id!==excl).sort((a,b)=>laneOf(a).localeCompare(laneOf(b),'th')||byBirth(a,b));
@@ -1460,20 +1491,29 @@ function addRow(pre,d={}){
   r.innerHTML=`<label class="field"><span>ชื่อเล่น</span><input class="m-nick" autocomplete="off"></label>
     <label class="field"><span>ชื่อจริง</span>${comboField('m-first',pre,WHO[pre])}</label>
     <label class="field"><span>นามสกุล</span>${comboField('m-last','sur','นามสกุล')}</label>
-    ${pre==='sp'?`<label class="field"><span>สถานะ</span><select class="m-st">${SP_ST.map(x=>`<option>${x}</option>`).join('')}</select></label>`
+    ${pre==='sp'?`<label class="field"><span>สถานะ</span><select class="m-st"><option value="">— ไม่ระบุ —</option>${SP_ST.map(x=>`<option>${x}</option>`).join('')}</select></label>`
       :pre==='sb'?`<label class="field"><span>สถานะพี่น้อง</span>${comboField('m-st','sbst','สถานะพี่น้อง')}</label>`:''}
+    <label class="field"><span>สถานะภาพ</span><select class="m-life">${lifeOpts(d.life)}</select></label>
     <button type="button" class="rm" title="เอาออก" aria-label="เอาแถวนี้ออก">×</button>
     <p class="tag"></p>`;
   box.appendChild(r);
   r.querySelector('.m-nick').value=d.nick||'';r.querySelector('.m-first').value=d.first||'';r.querySelector('.m-last').value=d.last||'';
-  if(pre==='sp')r.querySelector('.m-st').value=SP_ST.includes(d.st)?d.st:SP_ST[0];
+  if(pre==='sp')r.querySelector('.m-st').value=SP_ST.includes(d.st)?d.st:'';
   if(pre==='sb')r.querySelector('.m-st').value=d.st||'';
-  rowTag(r);return r;
+  rowTag(r);if(pre==='sp')lockSpouse();return r;
+}
+// สถานะ "คู่สมรสเสียชีวิต": สถานะภาพของคู่สมรสต้องเป็น เสียชีวิต และล็อกไว้
+function spDeadSync(r){
+  const st=r.querySelector('.m-st'),life=r.querySelector('.m-life');if(!st||!life||r.dataset.pre!=='sp')return;
+  const dead=st.value==='คู่สมรสเสียชีวิต';
+  if(dead){if(life.dataset.prev===undefined)life.dataset.prev=life.value;life.value='เสียชีวิต';}
+  else if(life.dataset.prev!==undefined){life.value=life.dataset.prev;delete life.dataset.prev;}
+  life.disabled=dead||isSingle();life.title=dead?'ล็อกไว้เพราะสถานะเป็นคู่สมรสเสียชีวิต':'';
 }
 function rowTag(r){const x=r.dataset.pid&&P(r.dataset.pid);r.querySelector('.tag').textContent=x?`โยงกับการ์ด ${displayName(x)} ในผังแล้ว`:'';}
 function pickRow(r){
   const pre=r.dataset.pre,inp=r.querySelector('.m-first'),v=inp.value.trim(),id=S.form.pp[pre][v];
-  if(id){const x=P(id);r.dataset.pid=id;inp.value=x.first||'';r.querySelector('.m-nick').value=x.nick||'';r.querySelector('.m-last').value=x.last||'';}
+  if(id){const x=P(id);r.dataset.pid=id;inp.value=x.first||'';r.querySelector('.m-nick').value=x.nick||'';r.querySelector('.m-last').value=x.last||'';r.querySelector('.m-life').innerHTML=lifeOpts(x.status);delete r.querySelector('.m-life').dataset.prev;spDeadSync(r);}
   else if(r.dataset.pid&&v!==(P(r.dataset.pid)?.first||''))r.dataset.pid='';
   rowTag(r);
 }
@@ -1485,13 +1525,13 @@ function fillMulti(pre,p,excl){
   const linked=pre==='sp'?(me?spousesOf(me.id):(p.spouseIds||[])).map(P).filter(Boolean):me?(pre==='sb'?siblingsOf(me):kidsOf(me.id)).map(P).sort(byBirth):[];
   if(pre==='sp'&&me)linked.sort((a,b)=>(spStatus(me.id,a.id)==='สมรส')-(spStatus(me.id,b.id)==='สมรส'));
   const stCol=pre==='sp'?splitList(p.spouseStatus):pre==='sb'?splitList(p.siblingStatus):[];
-  const stAt=(i,x)=>pre==='sp'?(me?spStatus(me.id,x.id):'สมรส'):pre==='sb'?(stCol[i]&&stCol[i]!=='–'?stCol[i]:''):'';
-  if(linked.length)linked.forEach((x,i)=>addRow(pre,{pid:x.id,nick:x.nick,first:x.first,last:x.last,st:stAt(i,x)}));
+  const stAt=(i,x)=>pre==='sp'?(me?(stOf(me,x.id)||stOf(x,me.id)):''):pre==='sb'?(stCol[i]&&stCol[i]!=='–'?stCol[i]:''):'';
+  if(linked.length)linked.forEach((x,i)=>addRow(pre,{pid:x.id,nick:x.nick,first:x.first,last:x.last,st:stAt(i,x),life:x.status}));
   else{const n=splitList(p[role+'Nick']),f=splitList(p[role+'First']),l=splitList(p[role+'Last']),k=Math.max(n.length,f.length,l.length);
     let any=false;for(let i=0;i<k;i++){const d={nick:n[i]==='–'?'':n[i],first:f[i]==='–'?'':f[i],last:l[i]==='–'?'':l[i],st:stCol[i]&&stCol[i]!=='–'?stCol[i]:''};if(d.nick||d.first){addRow(pre,d);any=true;}}
     if(!any)addRow(pre);}
 }
-function rowsData(pre){return [...$(pre+'-rows').children].map(r=>({row:r,pid:r.dataset.pid,nick:r.querySelector('.m-nick').value.trim(),first:r.querySelector('.m-first').value.trim(),last:r.querySelector('.m-last').value.trim(),st:r.querySelector('.m-st')?.value||''})).filter(d=>d.nick||d.first);}
+function rowsData(pre){return [...$(pre+'-rows').children].map(r=>({row:r,pid:r.dataset.pid,nick:r.querySelector('.m-nick').value.trim(),first:r.querySelector('.m-first').value.trim(),last:r.querySelector('.m-last').value.trim(),st:r.querySelector('.m-st')?.value||'',life:r.querySelector('.m-life')?.value||''})).filter(d=>d.nick||d.first);}
 function joinText(role,list){
   const col=k=>{const v=list.map(d=>d[k]||'');return v.some(Boolean)?v.map(x=>x||'–').join(', '):'';};
   return {[role+'Nick']:col('nick'),[role+'First']:col('first'),[role+'Last']:col('last')};
@@ -1502,7 +1542,7 @@ function parentHint(pre){
 }
 function pickParent(pre){
   const v=$(`f-${pre}-first`).value.trim(),id=S.form.pp[pre][v];
-  if(id){const x=P(id);S.form[pre+'Id']=id;$(`f-${pre}-first`).value=x.first||'';$(`f-${pre}-nick`).value=x.nick||'';$(`f-${pre}-last`).value=x.last||'';}
+  if(id){const x=P(id);S.form[pre+'Id']=id;$(`f-${pre}-first`).value=x.first||'';$(`f-${pre}-nick`).value=x.nick||'';$(`f-${pre}-last`).value=x.last||'';$(`f-${pre}-st`).innerHTML=lifeOpts(x.status);}
   else if(S.form[pre+'Id']&&v!==(P(S.form[pre+'Id'])?.first||''))S.form[pre+'Id']='';
   parentHint(pre);
 }
@@ -1510,14 +1550,15 @@ function resolveParent(pre,self,row){
   const role=ROLE[pre];
   const nick=row?row.nick:$(`f-${pre}-nick`).value.trim(),first=row?row.first:$(`f-${pre}-first`).value.trim(),last=row?row.last:$(`f-${pre}-last`).value.trim();
   const fixed=row?row.pid:S.form[pre+'Id'];
+  const life=row?row.life:$(`f-${pre}-st`).value;
   const text={[role+'Nick']:nick,[role+'First']:first,[role+'Last']:last};
   if(!nick&&!first)return {id:'',text};
-  const withPerson=x=>({id:x.id,text:{[role+'Nick']:nick||x.nick||'',[role+'First']:first||x.first||'',[role+'Last']:last||x.last||''}});
+  const withPerson=x=>{if(life!==(x.status||''))(S.form.life||(S.form.life={}))[x.id]=life;return {id:x.id,text:{[role+'Nick']:nick||x.nick||'',[role+'First']:first||x.first||'',[role+'Last']:last||x.last||''}};};
   if(fixed&&P(fixed))return withPerson(P(fixed));
   const taken=S.form.taken||(S.form.taken=new Set());
   const hit=S.people.filter(x=>x.id!==self.id&&!taken.has(x.id)&&(first?(x.first||'')===first:(x.nick||'')===nick)&&(!last||!x.last||x.last===last)&&true);
   if(hit.length===1)return withPerson(hit[0]);
-  const np={id:'tmp'+Date.now().toString(36)+role+(++tmpSeq),nick,first,last:last||(['father','sibling','child'].includes(role)?self.last:''),gender:role==='father'?'ชาย':role==='mother'?'หญิง':role==='spouse'?(self.gender==='ชาย'?'หญิง':self.gender==='หญิง'?'ชาย':''):'',status:'',spouseIds:[]};
+  const np={id:'tmp'+Date.now().toString(36)+role+(++tmpSeq),nick,first,last:last||(['father','sibling','child'].includes(role)?self.last:''),gender:role==='father'?'ชาย':role==='mother'?'หญิง':role==='spouse'?(self.gender==='ชาย'?'หญิง':self.gender==='หญิง'?'ชาย':''):'',status:life||'',spouseIds:[]};
   if(role==='father'||role==='sibling'||role==='child')np.clan=self.clan||np.last;
   const pt=PARENT_TERM[self.term];if(pt&&(role==='father'||role==='mother'))np.term=pt[role==='father'?0:1];
   if(role==='sibling'&&self.term==='ลูก')np.term='ลูก';
@@ -1569,7 +1610,7 @@ async function openForm(id,rel,ofId){
   $('f-by').value=p.birth?.y||'';$('f-age').value=p.age||'';
   $('dl-job').innerHTML=uniq([...S.lists.jobs,...S.people.map(x=>x.job)]).map(n=>`<option value="${esc(n)}">`).join('');
   $('dl-mar').innerHTML=uniq([...S.lists.marriage,...S.people.map(x=>x.marriage)]).map(n=>`<option value="${esc(n)}">`).join('');
-  $('f-job').value=p.job||'';$('f-mar').value=p.marriage||'';$('f-tam').value=p.tambon||'';$('f-vil').value=p.village||'';
+  $('f-job').value=p.job||'';$('f-mar').value=p.marriage||'';lockSpouse();$('f-tam').value=p.tambon||'';$('f-vil').value=p.village||'';
   $('f-err').hidden=true;$('f-save').disabled=false;$('f-save').textContent='บันทึก';
   renderFormPhoto();autoAge();
   $('formwrap').hidden=false;document.body.classList.add('locked');comboSkip=true;$('f-first').focus({preventScroll:true});comboSkip=false;
@@ -1585,6 +1626,17 @@ function lockClan(clan){
   if(on){inp.value=clan;S.form.clanAuto=false;}
   inp.readOnly=on;inp.classList.toggle('locked',on);btn.hidden=on;
   $('f-clan-h').textContent=on?`กำลังดูข้อมูลตระกูล ${clan} ชื่อต้นตระกูลจึงล็อกไว้ เปลี่ยนได้โดยสลับตระกูลจากปุ่ม "ดูข้อมูลตระกูล"`:'ชื่อต้นตระกูล ใช้แบ่งฝั่งในผัง ถ้าว่างไว้จะใช้นามสกุล';
+}
+// สถานภาพ "โสด": ล็อกช่องคู่สมรสทั้งหมด
+const isSingle=()=>$('f-mar').value.trim()==='โสด';
+function lockSpouse(){
+  const on=isSingle(),box=$('sp-rows');
+  box.classList.toggle('locked',on);
+  box.querySelectorAll('input,select,button').forEach(x=>x.disabled=on);
+  document.querySelector('[data-addrow=sp]').disabled=on;
+  document.querySelector('.sp-lock').hidden=!on;
+  if(on&&comboEl&&box.contains(comboEl._input))comboClose();
+  box.querySelectorAll('.mrow').forEach(spDeadSync);
 }
 function closeForm(){comboClose();S.form=null;$('formwrap').hidden=true;if($('detail').hidden)document.body.classList.remove('locked');}
 // เปิดฟอร์มเปล่าสำหรับเพิ่มคนแรกของตระกูลที่เลือกจากปุ่ม "ดูข้อมูลตระกูล"
@@ -1616,7 +1668,7 @@ async function shrink(file){
 function itemFromForm(){
   const age=$('f-age').value.replace(/[^\d]/g,'');
   const old=S.form.id?P(S.form.id):null;
-  S.form.extra=[];
+  S.form.extra=[];S.form.life={};
   const sid=S.form.id||('tmp'+Date.now().toString(36)),term=$('f-term').value.trim();
   // เพศ: ใช้ตามที่เลือก (คำเรียก > ช่องเพศ) ถ้าขัดกับบทบาทพ่อ/แม่ของลูก ให้สลับบทบาทในลูกทุกคน
   const want=termGender(term)||$('f-gender').value,isF=S.people.some(k=>k.fatherId===sid),isM=S.people.some(k=>k.motherId===sid);
@@ -1625,8 +1677,8 @@ function itemFromForm(){
   const self={id:sid,last:$('f-last').value.trim(),clan:$('f-clan').value.trim(),gender:g,term};
   S.form.taken=new Set();
   const fa=resolveParent('fa',self),mo=resolveParent('mo',self),fatherId=fa.id,motherId=mo.id;
-  const spRows=rowsData('sp'),spIds=[],spSt=[];
-  for(const r of spRows){const x=resolveParent('sp',self,r);if(x.id&&!spIds.includes(x.id)&&x.id!==fatherId&&x.id!==motherId){S.form.taken.add(x.id);spIds.push(x.id);spSt.push(r.st||'สมรส');}}
+  const spRows=isSingle()?[]:rowsData('sp'),spIds=[],spSt=[];
+  for(const r of spRows){const x=resolveParent('sp',self,r);if(x.id&&!spIds.includes(x.id)&&x.id!==fatherId&&x.id!==motherId){S.form.taken.add(x.id);spIds.push(x.id);spSt.push(r.st||'–');}}
   const sp={text:joinText('spouse',spRows)};
   const sbRows=rowsData('sb'),chRows=rowsData('ch');
   S.form.sbIds=sbRows.map(r=>{const x=resolveParent('sb',self,r);if(x.id)S.form.taken.add(x.id);return x.id;}).filter(Boolean);
@@ -1660,8 +1712,8 @@ function buildWrites(item){
   for(const x of S.form.extra||[])w.set(x.id,x);
   const touch=id=>{if(!w.has(id)){const o=P(id);if(!o)return null;w.set(id,{...o,spouseIds:[...(o.spouseIds||[])]});}return w.get(id);};
   // สถานะคู่สมรสต้องเรียงตรงกับรหัสคู่สมรสเสมอ
-  const stMap=x=>{const m={};(x.spouseIds||[]).forEach(id=>m[id]=stOf(x,id)||'สมรส');return m;};
-  const setSp=(x,ids,m)=>{x.spouseIds=ids;x.spouseStatus=ids.length?ids.map(id=>m[id]||'สมรส').join(', '):'';};
+  const stMap=x=>{const m={};(x.spouseIds||[]).forEach(id=>m[id]=stOf(x,id)||'–');return m;};
+  const setSp=(x,ids,m)=>{x.spouseIds=ids;x.spouseStatus=ids.length?ids.map(id=>m[id]||'–').join(', '):'';};
   const addSp=(x,id,st)=>{if(!x||x.id===id)return;const m=stMap(x);if(st)m[id]=st;setSp(x,x.spouseIds.includes(id)?x.spouseIds:[...x.spouseIds,id],m);};
   const rmSp=(x,id)=>{if(!x)return;const m=stMap(x);setSp(x,x.spouseIds.filter(s=>s!==id),m);};
   // พ่อกับแม่ที่ระบุ ให้เป็นคู่สมรสกัน (ถ้ายังไม่ได้โยง)
@@ -1688,7 +1740,7 @@ function buildWrites(item){
     if(!s.siblingFirst&&!s.siblingNick)Object.assign(s,{siblingNick:item.nick||'',siblingFirst:item.first||'',siblingLast:item.last||''});}}
   // ลูก: คนนี้เป็นพ่อหรือแม่ของลูก คู่สมรสเป็นอีกฝ่าย
   for(const chId of S.form.chIds||[]){const c=touch(chId);if(c&&c.fatherId!==item.id&&c.motherId!==item.id){
-    const cur0=(item.spouseIds||[]).find(s=>myst[s]==='สมรส')||'',cx=cur0&&(P(cur0)||(S.form.extra||[]).find(e=>e.id===cur0)),spg=cx?cx.gender:'';
+    const cur0=(item.spouseIds||[]).find(s=>myst[s]==='สมรส'||myst[s]==='–')||'',cx=cur0&&(P(cur0)||(S.form.extra||[]).find(e=>e.id===cur0)),spg=cx?cx.gender:'';
     const asMom=item.gender==='หญิง'||(!item.gender&&spg==='ชาย');
     const k=asMom?'motherId':'fatherId',o=asMom?'fatherId':'motherId',r=asMom?'mother':'father';
     if(!c[k])c[k]=item.id;
@@ -1701,6 +1753,8 @@ function buildWrites(item){
     [c.fatherId,c.motherId]=[c.motherId||'',c.fatherId||''];
     for(const f of ['Nick','First','Last'])[c['father'+f],c['mother'+f]]=[c['mother'+f]||'',c['father'+f]||''];
   }
+  // สถานะภาพ (มีชีวิต/เสียชีวิต/สาบสูญ) ที่เลือกในข้อ 4-6 อัปเดตลงการ์ดของคนนั้น
+  for(const [id,v] of Object.entries(S.form.life||{})){const t=touch(id);if(t)t.status=v;}
   // พ่อต้องเป็นชาย แม่ต้องเป็นหญิงเสมอ (รวมถึงคำเรียกญาติของการ์ดพ่อแม่)
   for(const it of [...w.values()]){
     if(it.fatherId)setGender(touch(it.fatherId),'ชาย');
@@ -1788,7 +1842,7 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('[
 document.addEventListener('input',e=>{if(e.target.matches&&e.target.matches('[data-combo]')&&!e.target.readOnly)comboOpen(e.target,false);});
 document.addEventListener('mousedown',e=>{
   const li=e.target.closest('.combo-list li[data-v]');if(li){e.preventDefault();comboPick(li.dataset.v);return;}
-  const b=e.target.closest('.combo-btn');if(b){e.preventDefault();const inp=b.previousElementSibling;if(comboEl&&comboEl._input===inp&&comboEl._all)comboClose();else{comboSkip=true;inp.focus();comboSkip=false;comboOpen(inp,true);}return;}
+  const b=e.target.closest('.combo-btn');if(b){e.preventDefault();const inp=b.previousElementSibling;if(inp.disabled)return;if(comboEl&&comboEl._input===inp&&comboEl._all)comboClose();else{comboSkip=true;inp.focus();comboSkip=false;comboOpen(inp,true);}return;}
   if(comboEl&&!e.target.closest('.combo,.combo-list'))comboClose();
 });
 document.addEventListener('scroll',e=>{if(comboEl&&comboEl.classList.contains('side')&&!comboEl.contains(e.target))comboClose();},true);
@@ -1971,12 +2025,14 @@ document.addEventListener('change',async e=>{
   if(t.id==='f-fa-first')pickParent('fa');
   if(t.id==='f-mo-first')pickParent('mo');
   if(t.classList&&t.classList.contains('m-first'))pickRow(t.closest('.mrow'));
+  if(t.classList&&t.classList.contains('m-st'))spDeadSync(t.closest('.mrow'));
   if(t.id==='f-prov'||t.id==='f-amp')geoChanged(t.id);
   if(['f-bd','f-bm','f-status'].includes(t.id))autoAge();
   if(t.id==='f-term'){const g=termGender(t.value.trim());if(g)$('f-gender').value=g;}
   if(t.id==='f-gender'){const x={term:$('f-term').value.trim()};setGender(x,t.value);if(x.term!==$('f-term').value.trim())$('f-term').value=x.term;}
 });
 $('f-by').addEventListener('input',autoAge);
+for(const ev of ['input','change'])$('f-mar').addEventListener(ev,lockSpouse);
 $('f-nick').addEventListener('input',()=>{if(!S.form.photo)renderFormPhoto();});
 // ชื่อต้นตระกูลเปลี่ยนตามนามสกุล จนกว่าจะพิมพ์ชื่อต้นตระกูลเองให้ต่างออกไป
 function syncClan(){if(S.form&&S.form.clanAuto&&!$('f-clan').readOnly)$('f-clan').value=$('f-last').value.trim();}
