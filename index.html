@@ -622,6 +622,35 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
   .form legend small{color:#CFF5DA}
   .form input,.form select{background:var(--raised);border-color:var(--line)}
 }
+/* หัวเว็บ: ปุ่มและช่องสูงเท่ากัน จอกว้างรวมเป็นแถวเดียว */
+.top-in .lead .search{height:36px;padding:0 12px}
+.clansel{height:36px}
+.clansel .arr{background:#2F7BF0;color:#fff;border-left-color:#2F7BF0}
+.acct .who .btn{height:36px;display:inline-flex;align-items:center;gap:4px}
+.acct .fab{height:36px;border-radius:18px}
+.acct .who>span:not(.addopt):not(.role){white-space:nowrap}
+@media (min-width:1680px){
+  .top-in{grid-template-columns:auto minmax(0,1fr) auto;gap:10px 24px;padding-block:10px}
+  .top-in .brand{grid-column:1;grid-row:1}
+  .top-in .lead{grid-column:2;grid-row:1;flex-wrap:nowrap}
+  .top-in .lead .sbox{flex:1 1 280px;max-width:380px}
+  .top-in .acct{grid-column:3;grid-row:1}
+}
+@media (max-width:640px){.top-in .lead .search,.clansel{height:34px}}
+.acct .role{white-space:nowrap}
+@media (min-width:901px) and (max-width:1365px){
+  .acct .who>span:not(.addopt):not(.role){display:none}
+  .top-in .brand{min-width:0}
+  .brand #sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media (min-width:901px) and (max-width:1180px){
+  .top-in{gap:8px 12px}
+  .acct,.acct .who{gap:5px!important}
+  .acct .who .btn{padding:0 9px;font-size:.8rem}
+  .acct .fab{padding:0 12px 0 9px;font-size:.84rem}
+  .acct .fab svg{width:16px;height:16px}
+  .brand h1{font-size:1.4rem}
+}
 </style>
 </head>
 <body>
