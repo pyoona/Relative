@@ -409,6 +409,19 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
 .form .grid.pst{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 120px 26px}
 .form .mrow .m-life{width:100%}
 .row-cells>.cell{min-width:0!important}
+/* คลิกซ้ายค้างแล้วลากเพื่อเลื่อนดูผัง */
+#tree .chart-wrap{cursor:grab}
+body.panning,body.panning *{cursor:grabbing!important;user-select:none!important}
+/* ป้าย "รุ่นที่ …" อยู่กับที่ ไม่ตามมาบังการ์ดตอนเลื่อนผังไปทางขวา */
+.row-h{position:relative;left:auto;box-shadow:none}
+/* เพิ่มระยะห่างระหว่างรุ่น ให้เส้นโยงมีที่ว่างไม่เบียดกัน */
+.chart,body .chart{row-gap:100px}
+/* ป้าย "ตระกูล: …" สีน้ำเงิน */
+.chart-title{background:var(--blue);border-color:var(--blue);color:#fff}
+.chart-title .k{color:#fff;opacity:.85}
+.viewmenu{min-width:230px}
+.viewmenu button.on{background:var(--blue-soft);color:var(--blue);font-weight:600}
+.viewmenu button.on::after{content:' ✓'}
 .clanmenu .sep{height:1px;background:var(--line);margin:4px 6px}
 .clanmenu .row.act{justify-content:flex-start;gap:8px;font-size:.88rem}
 .clanmenu .row.act.del{color:var(--danger)}
@@ -911,7 +924,15 @@ const DEMO_PEOPLE=[
 const S={people:[],lists:DEFAULT_LISTS,user:null,token:null,geo:null,geoVersion:null,q:'',order:[],cur:0,play:null,form:null,clanView:null};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function setCompact(on){S.compact=!!on;document.body.classList.toggle('compact',S.compact);store('rel-view',S.compact?'2':null);document.querySelectorAll('.viewbtn .vm').forEach(x=>x.textContent=S.compact?'2':'1');}
+// มุมมองการ์ด: 1 กึ่งกลาง · 2 กึ่งกลาง+แสดงข้อมูลการ์ด · 3 ชิดขอบซ้าย · 4 ชิดขอบซ้าย+แสดงข้อมูลการ์ด
+// ลูกอยู่ใต้กึ่งกลางพ่อแม่เสมอ · ผัง ป้ายตระกูล และป้ายรุ่นล็อกชิดซ้ายเสมอ
+const VIEWS=['','กึ่งกลาง','กึ่งกลาง+แสดงข้อมูลการ์ด','ชิดขอบซ้าย','ชิดขอบซ้าย+แสดงข้อมูลการ์ด'];
+function setView(v){v=[1,2,3,4].includes(+v)?+v:2;S.view=v;S.compact=v===1||v===3;S.leftAlign=v>=3;
+  document.body.classList.toggle('compact',S.compact);document.body.classList.toggle('leftalign',S.leftAlign);
+  store('rel-view2',String(v));
+  document.querySelectorAll('.viewmenu [data-view]').forEach(b=>b.classList.toggle('on',+b.dataset.view===v));}
+function setCompact(on){setView(on?1:2);}
+function viewMenu(show){const m=document.querySelector('.viewmenu');if(m)m.hidden=show===undefined?!m.hidden:!show;}
 function store(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
 function recall(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600);}
@@ -978,7 +999,9 @@ function siblingGroups(p){
 function siblingBadge(p,sid){const s=P(sid);if(!s)return 'พี่น้อง';const d=byBirth(s,p);const ord=d<0?'พี่':d>0?'น้อง':'';const g=s.gender==='ชาย'?'ชาย':s.gender==='หญิง'?'สาว':'';return (ord&&g)?ord+g:(ord||'พี่น้อง');}
 // ฝั่งในผัง: ชื่อต้นตระกูล > นามสกุล > ฝั่งของพ่อ (หรือแม่) ถ้ายังไม่ได้ใส่นามสกุล
 function laneOf(p,depth=0){const own=(p.clan||p.last||'').trim();if(own)return own;const par=depth<8&&(P(p.fatherId)||P(p.motherId));return par?laneOf(par,depth+1):'ไม่ระบุนามสกุล';}
-const byBirth=(a,b)=>(a.birth?.y||9999)-(b.birth?.y||9999)||(a.birth?.m||13)-(b.birth?.m||13)||(a.birth?.d||32)-(b.birth?.d||32);
+// เรียงตามปีเกิด ถ้าไม่มีปีเกิดแต่มีอายุ (และยังมีชีวิต) ประมาณปีเกิดจากอายุ ไม่มีทั้งคู่ไว้ท้ายสุด
+const birthY=p=>{if(p.birth?.y)return p.birth.y;const a=parseInt(String(p.age||''),10);return a>=0&&!isDead(p)?new Date().getFullYear()+543-a:9999;};
+const byBirth=(a,b)=>birthY(a)-birthY(b)||(a.birth?.m||13)-(b.birth?.m||13)||(a.birth?.d||32)-(b.birth?.d||32);
 
 // รุ่น: ใช้ความสัมพันธ์พ่อแม่-ลูกก่อน แล้วใช้คำเรียกญาติช่วยจัดระดับของแต่ละกลุ่ม
 function computeRows(){
@@ -1040,9 +1063,9 @@ function clanNames(){
   const all=uniq((S.lists.clans||[]).map(x=>String(x||'').trim())).filter(Boolean),ok=allowedClans();
   return ok||all;
 }
-function clanFilterPeople(){
-  if(!S.clanView)return S.people;
-  const blood=S.people.filter(p=>laneOf(p)===S.clanView);
+function clanFilterPeople(){return S.clanView?peopleOfClans([S.clanView]):S.people;}
+function peopleOfClans(clans){
+  const blood=S.people.filter(p=>clans.includes(laneOf(p)));
   const bloodIds=new Set(blood.map(p=>p.id));
   // ลูกที่เกิดจากคนในตระกูล แต่ย้ายชื่อต้นตระกูลไปตามคู่สมรสแล้ว (เช่น ลูกสาวที่แต่งงานออกไป) ยังแสดงในตระกูลเดิม
   // และคู่สมรสของเขาก็แสดงด้วย คนเดียวจึงอยู่ได้ทั้งสองตระกูล
@@ -1117,12 +1140,15 @@ function render(){
     });
     entries.sort((a,b)=>(a.x===null?Infinity:a.x)-(b.x===null?Infinity:b.x)||a.fb.localeCompare(b.fb,'th'));
     html+=`<div class="trow"><div class="row-h"><b>${r===999?'ยังไม่โยง':'รุ่นที่ '+(++n)}</b><small>${esc(terms.slice(0,4).join(' · ')+(terms.length>4?' …':''))}</small></div><div class="row-cells">`;
-    let cur=0;
+    let cur=0,unitN=0;
     for(const e of entries){
       const arr=cellOrder(e.arr);
       for(const p of arr){pos.set(p.id,cur++);}
       S.order.push(...arr.map(p=>p.id));
-      html+=`<div class="cell">${cellHtml(arr)}</div>`;
+      // แยกเป็นช่องย่อยต่อ "คน + คู่สมรส" เพื่อให้จัดตำแหน่งแต่ละครอบครัวให้อยู่เหนือกึ่งกลางลูกได้
+      const blocks=[];for(const p of arr){const b=blocks[blocks.length-1];if(b&&b.some(q=>spousesOf(q.id).includes(p.id)))b.push(p);else blocks.push([p]);}
+      for(const b of blocks)html+=`<div class="cell" data-unit="${unitN}">${cellHtml(b)}</div>`;
+      unitN++;
     }
     html+='</div></div>';
   });
@@ -1172,16 +1198,38 @@ function cardSpouseLine(p){
   return `<div class="sp"><dt>คู่สมรส</dt><dd>${parts.join(' · ')}</dd></div>`;
 }
 function centerChartTitle(){
-  // จัดป้าย "ตระกูล: X" ให้อยู่กึ่งกลางของเนื้อหาผังจริง (ไม่ใช่กึ่งกลางหน้าจอ) โดยอิงความกว้างของแถวที่กว้างที่สุด
+  // จัดป้าย "ตระกูล: X" ไว้มุมซ้ายบนของผัง เหนือคอลัมน์ "รุ่นที่ …"
   const chart=$('chart'),title=$('charttitle');if(!chart||!title)return;
   const rows=[...chart.querySelectorAll('.trow')];if(!rows.length)return;
   const cr=chart.getBoundingClientRect();
   const right=Math.max(...rows.map(r=>r.getBoundingClientRect().right-cr.left));
   const left=Math.min(...rows.map(r=>r.getBoundingClientRect().left-cr.left));
   const z=chart.offsetWidth?cr.width/chart.offsetWidth:1;
-  title.style.left=((left+right)/2/z)+'px';
-  title.style.transform='translateX(-50%)';
+  // ชิดซ้าย ตรงกับคอลัมน์ "รุ่นที่ …" ของแต่ละแถว
+  title.style.left=(left/z)+'px';
+  title.style.transform='none';
 }
+// ---------- คลิกซ้ายค้างแล้วลาก = เลื่อนดูผัง (เคอร์เซอร์เป็นรูปมือ) ----------
+(()=>{
+  let st=null,moved=false;
+  const scroller=()=>document.scrollingElement||document.documentElement;
+  document.addEventListener('mousedown',e=>{
+    const wrap=e.target.closest('#chartwrap');
+    if(!wrap||e.button!==0||e.target.closest('button,input,select,textarea,a,#zoombar'))return;
+    st={x:e.clientX,y:e.clientY,sl:wrap.scrollLeft,st:scroller().scrollTop,wrap};moved=false;
+    document.body.classList.add('panning');e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!st)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;
+    if(!moved&&Math.abs(dx)+Math.abs(dy)<4)return;moved=true;
+    st.wrap.scrollLeft=st.sl-dx;scroller().scrollTop=st.st-dy;
+  });
+  const end=()=>{if(!st)return;st=null;document.body.classList.remove('panning');
+    // ลากแล้วปล่อยบนการ์ด ไม่ให้นับเป็นการคลิกเปิดการ์ด
+    if(moved)document.addEventListener('click',ev=>{ev.stopPropagation();ev.preventDefault();},{capture:true,once:true});
+    setTimeout(()=>moved=false,0);};
+  document.addEventListener('mouseup',end);window.addEventListener('blur',end);
+})();
 // ---------- ย่อ/ขยายผัง ----------
 // ค่าเริ่มต้น "พอดีจอ": ย่อผังให้กว้างเท่าจอ (ไม่ขยายเกิน 100%) ถ้ากด +/− เองจะจำขนาดไว้ในเครื่องนี้
 const ZMIN=.35,ZMAX=1.6;
@@ -1193,55 +1241,50 @@ function fitZoom(){
   const min=innerWidth<=760?.45:.5; // มือถือย่อได้มากกว่า แต่ไม่ให้เล็กจนอ่านไม่ออก
   return Math.max(min,Math.min(1,(wrap.clientWidth-4)/w));
 }
-// จัดช่องให้ลูกอยู่ใต้กึ่งกลางพ่อแม่ และพ่อแม่อยู่เหนือกึ่งกลางลูก เส้นโยงจะลงตรงและแตกซ้ายขวาสมมาตร
-// ขยับซ้าย/ขวาได้เท่าที่ไม่ทับช่องข้างๆ วนหลายรอบจนตำแหน่งนิ่ง แล้วเลื่อนทั้งผังให้ชิดซ้ายเหมือนเดิม
+// จัดตำแหน่งให้ลูกอยู่ใต้กึ่งกลางพ่อแม่ และพ่อแม่อยู่เหนือกึ่งกลางลูก (แต่ละช่อง = คน + คู่สมรส)
+// ลูกพ่อแม่เดียวกันขยับไปพร้อมกันเป็นกลุ่ม ไม่ให้ช่องทับกัน วนหลายรอบจนตำแหน่งนิ่ง แล้วเลื่อนทั้งผังให้ชิดซ้าย
 function alignCells(){
   const chart=$('chart');if(!chart)return;
   const prevZ=chart.style.zoom;chart.style.zoom=1;
   const rcs=[...chart.querySelectorAll('.row-cells')];
   rcs.forEach(rc=>rc.querySelectorAll(':scope>.cell').forEach(c=>c.style.marginLeft=''));
-  const where=new Map(); // id -> {cell, off(กึ่งกลางการ์ดจากขอบซ้ายช่อง)}
+  const where=new Map();
   const rows=rcs.map((rc,ri)=>{const gap=parseFloat(getComputedStyle(rc).columnGap)||0,base=rc.getBoundingClientRect().left;
     const cells=[...rc.querySelectorAll(':scope>.cell')].map(el=>{const r=el.getBoundingClientRect();
-      const c={el,ri,L:r.left-base,w:r.width,ids:[]};
+      const c={el,ri,L:r.left-base,w:r.width,ids:[],unit:el.dataset.unit};
       el.querySelectorAll('.card[data-id]').forEach(k=>{const kr=k.getBoundingClientRect();where.set(k.dataset.id,{c,off:(kr.left+kr.right)/2-r.left});c.ids.push(k.dataset.id);});
       return c;});
+    cells.forEach((c,i)=>c.i=i);
     return {gap,cells};});
   const X=id=>{const w=where.get(id);return w.c.L+w.off;};
   const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
-  const parentsIn=id=>{const p=P(id);return p?[p.fatherId,p.motherId].filter(x=>x&&where.has(x)&&where.get(x).c.ri<where.get(id).c.ri&&where.get(x).c!==where.get(id).c):[];};
-  // พี่น้อง (รวมพี่น้องต่างแม่/ต่างพ่อ) ที่อยู่คนละช่อง วางชิดกันเท่าระยะการ์ด ไม่ต้องเว้นช่องกว้าง
+  const parentsIn=id=>{const p=P(id),me=where.get(id);return p?[p.fatherId,p.motherId].filter(x=>x&&where.has(x)&&where.get(x).c.ri<me.c.ri):[];};
   const sib=(a,b)=>a.ids.some(x=>{const p=P(x);return p&&b.ids.some(y=>{const q=P(y);return q&&((p.fatherId&&p.fatherId===q.fatherId)||(p.motherId&&p.motherId===q.motherId));});});
-  const gapOf=(row,a,b)=>sib(a,b)?Math.min(row.gap,16):row.gap;
-  const pack=row=>{for(let i=1;i<row.cells.length;i++){const a=row.cells[i-1],c=row.cells[i];c.L=Math.max(c.L,a.L+a.w+gapOf(row,a,c));}};
-  const prevR=(row,c)=>{const i=row.cells.indexOf(c);if(i<1)return -Infinity;const a=row.cells[i-1];return a.L+a.w+gapOf(row,a,c);};
-  const down=()=>{for(const row of rows){for(const c of row.cells){
-      const kids=c.ids.filter(id=>parentsIn(id).length);if(!kids.length)continue;
-      const par=[...new Set(kids.flatMap(parentsIn))];
-      const offs=kids.map(id=>where.get(id).off),kmid=(Math.min(...offs)+Math.max(...offs))/2;
-      push(c,Math.max(prevR(row,c),mean(par.map(X))-kmid));}pack(row);}};
-  let moved=false;const push=(c,want)=>{if(Math.abs(want-c.L)>0.5){c.L=want;moved=true;}};
-  for(let it=0;it<8;it++){
-    moved=false;
-    // บนลงล่าง: ลูกอยู่ใต้กึ่งกลางพ่อแม่
-    for(const row of rows){for(const c of row.cells){
-      const kids=c.ids.filter(id=>parentsIn(id).length);if(!kids.length)continue;
-      const par=[...new Set(kids.flatMap(parentsIn))];
-      const offs=kids.map(id=>where.get(id).off),kmid=(Math.min(...offs)+Math.max(...offs))/2;
-      push(c,Math.max(prevR(row,c),mean(par.map(X))-kmid));}pack(row);}
-    // ล่างขึ้นบน: พ่อแม่อยู่เหนือกึ่งกลางลูก
-    for(let r=rows.length-1;r>=0;r--){const row=rows[r];for(const c of row.cells){
-      // แยกลูกตามคู่พ่อแม่ (เช่น ลูกกับภรรยาคนแรก / คนที่สอง) แล้วเฉลี่ยระยะที่ต้องขยับ
+  const gapOf=(row,a,b)=>(a.unit===b.unit||sib(a,b))?Math.min(row.gap,16):row.gap;
+  const minL=(row,i)=>i<1?(S.leftAlign?0:-Infinity):row.cells[i-1].L+row.cells[i-1].w+gapOf(row,row.cells[i-1],row.cells[i]);
+  const pack=row=>{for(let i=1;i<row.cells.length;i++)row.cells[i].L=Math.max(row.cells[i].L,minL(row,i));};
+  const keyOf=c=>{const ks=[...new Set(c.ids.map(id=>parentsIn(id).slice().sort().join('|')).filter(Boolean))];return ks[0]||'';};
+  // บนลงล่าง: กลุ่มพี่น้อง (ช่องติดกันที่มีพ่อแม่ชุดเดียวกัน) อยู่ใต้กึ่งกลางพ่อแม่
+  const down=()=>{for(const row of rows){const cs=row.cells;
+    for(let i=0;i<cs.length;){const k=keyOf(cs[i]);let j=i+1;if(k)while(j<cs.length&&keyOf(cs[j])===k)j++;
+      if(k){const kids=cs.slice(i,j).flatMap(c=>c.ids.filter(id=>parentsIn(id).slice().sort().join('|')===k));
+        const xs=kids.map(X),mid=(Math.min(...xs)+Math.max(...xs))/2,target=mean(k.split('|').map(X));
+        const d=Math.max(target-mid,minL(row,i)-cs[i].L);for(let t=i;t<j;t++)cs[t].L+=d;}
+      i=j;pack(row);}}};
+  // ล่างขึ้นบน: พ่อแม่อยู่เหนือกึ่งกลางลูกของตัวเอง
+  const up=()=>{for(let r=rows.length-1;r>=0;r--){const row=rows[r];row.cells.forEach((c,i)=>{
       const groups=new Map();
       for(const k of where.keys()){const ps=parentsIn(k);if(!ps.some(x=>where.get(x).c===c))continue;const key=ps.slice().sort().join('|');if(!groups.has(key))groups.set(key,{ps,kids:[]});groups.get(key).kids.push(k);}
-      if(!groups.size)continue;
-      const shifts=[...groups.values()].map(g=>{const xs=g.kids.map(X);return (Math.min(...xs)+Math.max(...xs))/2-mean(g.ps.map(X));});
-      push(c,Math.max(prevR(row,c),c.L+mean(shifts)));}pack(row);}
-    if(!moved)break;
-  }
-  down(); // รอบสุดท้าย: ให้ลูกอยู่ใต้พ่อแม่ก่อนเสมอ
-  const minL=Math.min(...rows.filter(r=>r.cells.length).map(r=>r.cells[0].L));
-  for(const row of rows)for(const c of row.cells)c.L-=minL;
+      if(!groups.size)return;
+      const sh=mean([...groups.values()].map(g=>{const xs=g.kids.map(X);return (Math.min(...xs)+Math.max(...xs))/2-mean(g.ps.map(X));}));
+      c.L=Math.max(minL(row,i),c.L+sh);});pack(row);}};
+  rows.forEach(pack);
+  // มุมมองชิดขอบซ้าย: การ์ดเรียงชิดซ้าย ไม่ขยับพ่อแม่ ขยับเฉพาะลูกไปอยู่ใต้กึ่งกลางพ่อแม่ถ้ามีที่ว่าง
+  if(S.leftAlign)down();
+  else for(let it=0;it<12;it++){const before=rows.flatMap(r=>r.cells.map(c=>c.L)).join();down();up();if(rows.flatMap(r=>r.cells.map(c=>c.L)).join()===before)break;}
+  if(!S.leftAlign)down();
+  const m0=Math.min(...rows.filter(r=>r.cells.length).map(r=>r.cells[0].L));
+  for(const row of rows)for(const c of row.cells)c.L-=m0;
   for(const row of rows){let prev=null;for(const c of row.cells){const nat=prev===null?0:prev+row.gap,m=c.L-nat;c.el.style.marginLeft=Math.abs(m)>0.5?m+'px':'';prev=c.L+c.w;}}
   chart.style.zoom=prevZ;
 }
@@ -1278,16 +1321,35 @@ function drawLinks(){
   centerChartTitle();
   const box=id=>{const el=chart.querySelector(`.card[data-id="${CSS.escape(id)}"]`);if(!el)return null;const r=el.getBoundingClientRect();
     return {l:(r.left-cr.left)/z,r:(r.right-cr.left)/z,t:(r.top-cr.top)/z,b:(r.bottom-cr.top)/z,cx:((r.left+r.right)/2-cr.left)/z};};
-  let d='',ds='';const bars=new Set();
+  let d='',ds='';
+  // จัดกลุ่มลูกตามคู่พ่อแม่ แล้วลากเส้นลงจากจุดบนเส้นพ่อแม่ที่ใกล้กึ่งกลางลูกที่สุด
+  // ลูกคนเดียวที่อยู่ในช่วงระหว่างพ่อกับแม่ เส้นจะลงตรงไม่หัก
+  const groups=new Map();
   for(const p of S.people){
     const c=box(p.id);if(!c)continue;
-    const ps=parentsOf(p).map(box).filter(Boolean);if(!ps.length)continue;
-    const bus=c.t-24;
-    if(ps.length===2&&Math.abs(ps[0].b-ps[1].b)<4){
-      const [a,b]=ps,y0=Math.max(a.b,b.b)+12,sx=(a.cx+b.cx)/2,key=[p.fatherId,p.motherId].join('|');
-      if(!bars.has(key)){bars.add(key);d+=`M${a.cx} ${a.b}V${y0}M${b.cx} ${b.b}V${y0}M${a.cx} ${y0}H${b.cx}`;}
-      d+=`M${sx} ${y0}V${bus}H${c.cx}V${c.t}`;
-    }else for(const a of ps)d+=`M${a.cx} ${a.b}V${bus}H${c.cx}V${c.t}`;
+    const pids=[p.fatherId,p.motherId].filter(id=>id&&box(id));if(!pids.length)continue;
+    const ps=pids.map(box),pair=ps.length===2&&Math.abs(ps[0].b-ps[1].b)<4;
+    const keys=pair?[pids.slice().sort().join('|')]:pids;
+    keys.forEach((k,i)=>{if(!groups.has(k))groups.set(k,{ps:pair?ps:[ps[i]],kids:[]});groups.get(k).kids.push(c);});
+  }
+  for(const g of groups.values()){
+    const ps=g.ps.slice().sort((x,y)=>x.cx-y.cx),a=ps[0],b=ps[ps.length-1];
+    const y0=ps.length===2?Math.max(a.b,b.b)+12:a.b;
+    if(ps.length===2)d+=`M${a.cx} ${a.b}V${y0}M${b.cx} ${b.b}V${y0}M${a.cx} ${y0}H${b.cx}`;
+    const xs=g.kids.map(k=>k.cx),kmin=Math.min(...xs),kmax=Math.max(...xs);
+    let x=Math.max(a.cx,Math.min(b.cx,(kmin+kmax)/2));
+    if(g.kids.length===1&&xs[0]>=a.cx-1&&xs[0]<=b.cx+1)x=xs[0];
+    const top=Math.min(...g.kids.map(k=>k.t)),bus=top-24;
+    // มุมมองชิดขอบซ้าย: ลงจากพ่อแม่ครึ่งทาง แล้วเบนไปเหนือกึ่งกลางลูก เส้นที่แตกลงหาลูกจึงอยู่กึ่งกลางลูกเสมอ
+    // มุมมองชิดขอบซ้าย: เส้นลงจากกึ่งกลางพ่อแม่พอดี
+    if(S.leftAlign)x=(a.cx+b.cx)/2;
+    // เส้นลงจากพ่อแม่ที่ห่างจากเส้นของลูกไม่เกิน 12px ให้ตรงกันเป็นเส้นเดียว ไม่หักเป็นขั้นเล็กๆ
+    const near=xs.find(c=>Math.abs(c-x)<=12);if(near!==undefined)x=near;
+    let kmid=(kmin+kmax)/2;const nk=xs.find(c=>Math.abs(c-kmid)<=12);if(nk!==undefined)kmid=nk;
+    const shift=S.leftAlign&&Math.abs(x-kmid)>12;
+    if(shift){const ym=(y0+bus)/2;d+=`M${x} ${y0}V${ym}H${kmid}V${bus}`;}else d+=`M${x} ${y0}V${bus}`;
+    const lo=shift?kmin:Math.min(x,kmin),hi=shift?kmax:Math.max(x,kmax);if(hi-lo>.5)d+=`M${lo} ${bus}H${hi}`;
+    for(const k of g.kids)d+=`M${k.cx} ${bus}V${k.t}`;
   }
   const seen=new Set(),rings=[];
   for(const [id,list] of F.sp)for(const s of list){
@@ -1361,7 +1423,7 @@ function qOpen(){
 }
 function qClose(){$('q-list').hidden=true;$('q').setAttribute('aria-expanded','false');qIdx=-1;}
 const USERBTN='<button class="btn hist" type="button" data-act="users">เพิ่มสิทธิ์การใช้งาน</button>';
-const VIEWBTN=()=>`<button class="btn hist viewbtn" type="button" data-act="viewmode" title="สลับมุมมองการ์ด">เปลี่ยนมุมมอง <span class="vm">${S.compact?'2':'1'}</span></button>`;
+const VIEWBTN=()=>`<span class="addopt"><button class="btn hist viewbtn" type="button" data-act="viewmenu" aria-haspopup="menu">เปลี่ยนมุมมองการ์ด ▾</button><span class="optmenu viewmenu" role="menu" hidden>${[1,2,3,4].map(i=>`<button type="button" role="menuitemradio" data-view="${i}"${i===S.view?' class="on"':''}>${i}. ${VIEWS[i]}</button>`).join('')}</span></span>`;
 const isAdmin=()=>DEMO||!!(S.user&&S.user.admin);
 const OPTBTN='<span class="addopt"><button class="btn hist" type="button" data-act="optmenu" aria-haspopup="menu">เพิ่มข้อมูล ▾</button><span class="optmenu" role="menu" hidden><button type="button" role="menuitem" data-opt="job">อาชีพ</button><button type="button" role="menuitem" data-opt="surname">นามสกุล</button><button type="button" role="menuitem" data-opt="clan">ชื่อต้นตระกูล</button></span></span>';
 function renderWho(){
@@ -1945,7 +2007,7 @@ document.addEventListener('keydown',e=>{
 
 /* ---------- เพิ่มข้อมูลตัวเลือก (ชีต admin) ---------- */
 const OPT={job:{label:'อาชีพ',key:'jobs'},surname:{label:'นามสกุล',key:'surnames'},clan:{label:'ชื่อต้นตระกูล',key:'clans'}};
-function optMenu(show){const m=document.querySelector('.optmenu');if(m)m.hidden=show===undefined?!m.hidden:!show;}
+function optMenu(show){const m=document.querySelector('.optmenu:not(.viewmenu)');if(m)m.hidden=show===undefined?!m.hidden:!show;}
 function openOpt(kind){
   optMenu(false);S.opt={kind,added:null};const o=OPT[kind];
   $('o-title').textContent=`เพิ่ม${o.label}`;$('o-val').placeholder=`พิมพ์${o.label}ใหม่`;$('o-val').value='';
@@ -1973,22 +2035,19 @@ $('optform').addEventListener('submit',async e=>{
   btn.disabled=false;btn.textContent='เพิ่ม';$('o-val').focus();
 });
 $('optwrap').addEventListener('click',e=>{if(e.target.id==='optwrap')closeOpt();});
-document.addEventListener('mousedown',e=>{if(!e.target.closest('.addopt'))optMenu(false);});
+document.addEventListener('mousedown',e=>{if(!e.target.closest('.addopt'))optMenu(false);if(!e.target.closest('.addopt'))viewMenu(false);});
+// เลือกมุมมองการ์ดจาก dropdown
+document.addEventListener('click',e=>{const b=e.target.closest('.viewmenu [data-view]');if(!b)return;
+  setView(+b.dataset.view);viewMenu(false);applyZoom(false);requestAnimationFrame(drawLinks);toast(`มุมมองการ์ด: ${VIEWS[S.view]}`);});
 document.addEventListener('mousedown',e=>{if(!e.target.closest('#clanbtn,#clanmenu'))clanMenu(false);});
 
 /* ---------- ลบตระกูล / กู้คืนตระกูล (เฉพาะผู้ดูแล) ---------- */
 // ใช้เกณฑ์เดียวกับ Code.gs: คนในตระกูล + คู่สมรสที่แต่งเข้ามาซึ่งไม่ได้อยู่ตระกูลอื่นที่ตั้งไว้ และคู่สมรสทุกคนถูกลบด้วย
 function clanMembersLocal(clan){
-  const listed=(S.lists.clans||[]).map(x=>String(x||'').trim()),del=new Map();
-  const keep=[];
-  // คนในตระกูลที่แต่งงานหรือมีลูกอยู่ในตระกูลอื่น ไม่ลบ (เช่น ลูกสาวที่แต่งออกไปเป็นแม่ของคนตระกูลอื่น)
-  for(const p of S.people){if(laneOf(p)!==clan)continue;
-    const out=[...spousesOf(p.id),...kidsOf(p.id)].map(P).filter(Boolean).some(q=>laneOf(q)!==clan);
-    if(out)keep.push(p.id);else del.set(p.id,'blood');}
-  del.keep=keep;
-  for(const p of S.people){if(del.has(p.id)||listed.includes(laneOf(p)))continue;
-    const sps=spousesOf(p.id);if(sps.length&&sps.every(id=>del.has(id))&&!p.fatherId&&!p.motherId)del.set(p.id,'inlaw');}
-  return del;
+  const others=(S.lists.clans||[]).map(x=>String(x||'').trim()).filter(c=>c&&c!==clan);
+  const keepIds=new Set(others.length?peopleOfClans(others).map(p=>p.id):[]),del=new Map(),keep=[];
+  for(const p of peopleOfClans([clan])){if(keepIds.has(p.id))keep.push(p.id);else del.set(p.id,laneOf(p)===clan?'blood':'inlaw');}
+  del.keep=keep;return del;
 }
 let DEMO_TRASH=[];
 function showClanWrap(){$('clanwrap').hidden=false;document.body.classList.add('locked');}
@@ -1998,7 +2057,7 @@ function openClanDel(clan){
   const del=clanMembersLocal(clan),ppl=[...del.keys()].map(P).filter(Boolean);
   $('c-title').textContent='ลบตระกูล';
   $('c-body').innerHTML=`<label class="field"><span>เลือกตระกูลที่จะลบ</span><select id="c-clan">${names.map(n=>`<option${n===clan?' selected':''}>${esc(n)}</option>`).join('')}</select></label>
-    ${del.keep.length?`<p class="hint">ไม่ลบ ${del.keep.map(id=>'<b>'+esc(displayName(P(id)))+'</b>').join(', ')} เพราะแต่งงานหรือมีลูกอยู่ในตระกูลอื่น จะยังแสดงในผังของตระกูลนั้น</p>`:''}
+    ${del.keep.length?`<p class="hint">ไม่ลบ ${del.keep.map(id=>'<b>'+esc(displayName(P(id)))+'</b>').join(', ')} เพราะมีชื่ออยู่ในผังของตระกูลอื่นด้วย จะยังแสดงในตระกูลนั้นตามเดิม</p>`:''}
     <p class="warn">จะลบ <b>${ppl.length} คน</b> ออกจากผัง พร้อมเอาชื่อตระกูล "<b>${esc(clan)}</b>" ออกจากตัวเลือก<br>ข้อมูลไม่ได้หายถาวร ระบบเก็บไว้ในชีต "ตระกูลที่ลบ" กู้คืนได้จากเมนู "กู้คืนตระกูล"</p>
     ${ppl.length?`<div class="names">${ppl.map(p=>`<span${del.get(p.id)==='inlaw'?' class="il" title="คู่สมรสที่แต่งเข้ามา"':''}>${esc(displayName(p))}</span>`).join('')}</div>`:'<p class="muted">ตระกูลนี้ยังไม่มีสมาชิก</p>'}
     <label class="field"><span>พิมพ์ชื่อตระกูล "${esc(clan)}" เพื่อยืนยัน</span><input id="c-confirm" autocomplete="off"></label>
@@ -2019,7 +2078,7 @@ async function doClanDelete(){
     else{const j=await api('deleteClan',{clan});if(!j.ok)throw new Error(j.error);await load();}
     if(S.clanView===clan)S.clanView=null;
     closeClan();render();toast(`ลบตระกูล "${clan}" แล้ว กู้คืนได้จากเมนูกู้คืนตระกูล`);
-  }catch(x){if(x.message!=='auth'){err.hidden=false;err.textContent=x.message==='forbidden'?'เฉพาะผู้ดูแล (Edit + Full) เท่านั้นที่ลบตระกูลได้':x.message==='empty'?'ไม่พบสมาชิกของตระกูลนี้':'ลบไม่สำเร็จ ลองอีกครั้ง';}
+  }catch(x){if(x.message!=='auth'){err.hidden=false;err.textContent=x.message==='forbidden'?'เฉพาะผู้ดูแล (Edit + Full) เท่านั้นที่ลบตระกูลได้':x.message==='empty'?'ไม่พบสมาชิกของตระกูลนี้':`ลบไม่สำเร็จ ลองอีกครั้ง${x.message?' ('+x.message+')':''}`;}
     btn.disabled=false;btn.textContent='ลบตระกูล';}
 }
 function renderTrash(items){
@@ -2040,7 +2099,7 @@ async function doClanRestore(batch){
     if(DEMO){const it=DEMO_TRASH.find(x=>x.batch===batch);clan=it.clan;S.people=S.people.concat(it._people);if(!(S.lists.clans||[]).includes(clan))S.lists.clans=[...(S.lists.clans||[]),clan];DEMO_TRASH=DEMO_TRASH.filter(x=>x!==it);}
     else{const j=await api('restoreClan',{batch});if(!j.ok)throw new Error(j.error);clan=j.clan;await load();}
     S.clanView=clan;closeClan();render();toast(`กู้คืนตระกูล "${clan}" แล้ว`);
-  }catch(x){if(x.message!=='auth'){const err=$('c-err');if(err){err.hidden=false;err.textContent=x.message==='not_found'?'รายการนี้ถูกกู้คืนไปแล้ว':'กู้คืนไม่สำเร็จ ลองอีกครั้ง';}if(btn){btn.disabled=false;btn.textContent='กู้คืน';}}}
+  }catch(x){if(x.message!=='auth'){const err=$('c-err');if(err){err.hidden=false;err.textContent=x.message==='not_found'?'รายการนี้ถูกกู้คืนไปแล้ว':`กู้คืนไม่สำเร็จ ลองอีกครั้ง${x.message?' ('+x.message+')':''}`;}if(btn){btn.disabled=false;btn.textContent='กู้คืน';}}}
 }
 $('clanwrap').addEventListener('click',e=>{if(e.target.id==='clanwrap')closeClan();});
 
@@ -2141,7 +2200,7 @@ document.addEventListener('click',async e=>{
   else if(act==='cdo')doClanDelete();
   else if(act==='crestore')doClanRestore(a.dataset.batch);
   else if(act==='users')openUsers();
-  else if(act==='viewmode'){setCompact(!S.compact);applyZoom(false);requestAnimationFrame(drawLinks);toast(S.compact?'มุมมองที่ 2: รูปกับชื่อเล่น':'มุมมองที่ 1: ข้อมูลเต็ม');}
+  else if(act==='viewmenu'){optMenu(false);viewMenu();}
   else if(act==='uclose')closeUsers();
   else if(act==='pweye'){const i=$('u-pw'),show=i.type==='password';i.type=show?'text':'password';a.textContent=show?'ซ่อน':'แสดง';}
   else if(act==='clanmenu')clanMenu();
@@ -2235,14 +2294,14 @@ document.addEventListener('click',e=>{
   if(!document.body.classList.contains('menuopen'))return;
   if(e.target.closest('#menubtn'))return;
   // กดปุ่มในเมนูแล้วปิดเมนู ยกเว้นปุ่มเปิดเมนูย่อย "เพิ่มข้อมูล"
-  if(e.target.closest('#acct')){if(e.target.closest('[data-act=optmenu]'))return;if(e.target.closest('button'))setTimeout(()=>setMenu(false),0);return;}
+  if(e.target.closest('#acct')){if(e.target.closest('[data-act=optmenu],[data-act=viewmenu]'))return;if(e.target.closest('button'))setTimeout(()=>setMenu(false),0);return;}
   setMenu(false);
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('menuopen'))setMenu(false);});
 addEventListener('resize',()=>{if(innerWidth>900)setMenu(false);});
 
 /* ---------- start ---------- */
-setCompact(recall('rel-view')==='2');
+{const v2=recall('rel-view2'),old=recall('rel-view');setView(v2||(old==='2'?1:old==='3'?3:2));}
 if(DEMO){S.user={name:'ตัวอย่าง',role:'edit'};S.people=DEMO_PEOPLE.map(p=>({...p}));$('app').hidden=false;renderWho();render();}
 else{S.token=recall('rel-token');boot();}
 </script>
