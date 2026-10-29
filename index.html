@@ -404,10 +404,28 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
 .form .mrows{gap:6px}
 .form .mrow .rm{width:26px;height:30px}
 .form .mrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 120px 26px}
-.form .mrow.sp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 120px 120px 26px}
+.form .mrow.sp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 140px 120px 26px}
 .form .mrow.sb{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 140px 120px 26px}
 .form .grid.pst{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 120px 26px}
 .form .mrow .m-life{width:100%}
+.row-cells>.cell{min-width:0!important}
+.clanmenu .sep{height:1px;background:var(--line);margin:4px 6px}
+.clanmenu .row.act{justify-content:flex-start;gap:8px;font-size:.88rem}
+.clanmenu .row.act.del{color:var(--danger)}
+.clanmenu .row.act.del:hover{background:color-mix(in srgb,var(--danger) 10%,transparent);color:var(--danger)}
+.clan-sheet .warn{margin:0;padding:10px 12px;border-radius:8px;background:color-mix(in srgb,var(--danger) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--danger) 30%,transparent);font-size:.9rem;line-height:1.5}
+.clan-sheet .names{display:flex;flex-wrap:wrap;gap:6px}
+.clan-sheet .names span{padding:3px 10px;border-radius:999px;background:var(--blue-soft);color:var(--blue);font-size:.84rem}
+.clan-sheet .names span.il{background:var(--raised);color:var(--muted);border:1px dashed var(--line)}
+.clan-sheet select,.clan-sheet input{height:36px;border:1px solid var(--line);border-radius:7px;padding:0 10px;font:inherit;background:var(--raised);color:var(--ink);width:100%}
+.clan-sheet .acts{display:flex;justify-content:flex-end;gap:8px}
+.clan-sheet .tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--raised)}
+.clan-sheet .tr b{font-size:1rem}
+.clan-sheet .tr small{grid-column:1;color:var(--muted);font-size:.82rem}
+.clan-sheet .tr .names{grid-column:1/-1}
+.clan-sheet .tr .btn{grid-column:2;grid-row:1/3}
+.clan-sheet .muted{color:var(--muted);margin:0}
+.form select:disabled,.form input:disabled{background:#E5E7EB!important;color:#6B7280;border-color:#D1D5DB!important;cursor:not-allowed;opacity:1}
 .form .btn.sm{padding:3px 10px;font-size:.78rem}
 .form .subhead{font-size:.78rem;padding-top:6px}
 .form .up{gap:12px}
@@ -622,34 +640,12 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
   .form legend small{color:#CFF5DA}
   .form input,.form select{background:var(--raised);border-color:var(--line)}
 }
-/* หัวเว็บ: ปุ่มและช่องสูงเท่ากัน จอกว้างรวมเป็นแถวเดียว */
-.top-in .lead .search{height:36px;padding:0 12px}
-.clansel{height:36px}
-.clansel .arr{background:#2F7BF0;color:#fff;border-left-color:#2F7BF0}
-.acct .who .btn{height:36px;display:inline-flex;align-items:center;gap:4px}
-.acct .fab{height:36px;border-radius:18px}
-.acct .who>span:not(.addopt):not(.role){white-space:nowrap}
-@media (min-width:1680px){
-  .top-in{grid-template-columns:auto minmax(0,1fr) auto;gap:10px 24px;padding-block:10px}
+/* จอกว้าง: ย้ายช่องค้นหาและดูข้อมูลตระกูลขึ้นไปแถวบน ระหว่างชื่อเว็บกับปุ่ม */
+@media (min-width:1600px){
+  .top-in{grid-template-columns:auto minmax(0,1fr) auto}
   .top-in .brand{grid-column:1;grid-row:1}
-  .top-in .lead{grid-column:2;grid-row:1;flex-wrap:nowrap}
-  .top-in .lead .sbox{flex:1 1 280px;max-width:380px}
+  .top-in .lead{grid-column:2;grid-row:1;flex-wrap:nowrap;justify-content:center}
   .top-in .acct{grid-column:3;grid-row:1}
-}
-@media (max-width:640px){.top-in .lead .search,.clansel{height:34px}}
-.acct .role{white-space:nowrap}
-@media (min-width:901px) and (max-width:1365px){
-  .acct .who>span:not(.addopt):not(.role){display:none}
-  .top-in .brand{min-width:0}
-  .brand #sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-}
-@media (min-width:901px) and (max-width:1180px){
-  .top-in{gap:8px 12px}
-  .acct,.acct .who{gap:5px!important}
-  .acct .who .btn{padding:0 9px;font-size:.8rem}
-  .acct .fab{padding:0 12px 0 9px;font-size:.84rem}
-  .acct .fab svg{width:16px;height:16px}
-  .brand h1{font-size:1.4rem}
 }
 </style>
 </head>
@@ -681,8 +677,8 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
     <button class="menubtn" id="menubtn" type="button" aria-label="เมนู" aria-expanded="false" aria-controls="acct"><span></span><span></span><span></span></button>
     <div class="brand"><h1>ผังเครือญาติ</h1><p id="sub">กำลังโหลด…</p></div>
     <div class="acct" id="acct">
-      <button class="fab" id="fab" hidden aria-label="เพิ่มญาติ">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">เพิ่มญาติ</span>
+      <button class="fab" id="fab" hidden aria-label="เพิ่มสมาชิก">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">เพิ่มสมาชิก</span>
   </button>
       <div class="who" id="who"></div>
     </div>
@@ -731,6 +727,13 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
   </div>
 </div>
 
+<div class="modal" id="clanwrap" hidden role="dialog" aria-modal="true" aria-labelledby="c-title">
+  <div class="sheet opt-sheet clan-sheet">
+    <div class="sheet-top"><h2 id="c-title">ลบตระกูล</h2><button class="x" type="button" data-act="cclose" aria-label="ปิด">×</button></div>
+    <div class="opt-body" id="c-body"></div>
+  </div>
+</div>
+
 <div class="modal" id="userwrap" hidden role="dialog" aria-modal="true" aria-labelledby="u-title">
   <div class="sheet opt-sheet user-sheet">
     <div class="sheet-top"><h2 id="u-title">เพิ่มสิทธิ์การใช้งาน</h2><button class="x" type="button" data-act="uclose" aria-label="ปิด">×</button></div>
@@ -759,7 +762,7 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
 </div>
 <div class="modal" id="formwrap" hidden role="dialog" aria-modal="true" aria-labelledby="f-title">
   <div class="sheet form">
-    <div class="sheet-top"><h2 id="f-title">เพิ่มญาติ</h2><button class="x" type="button" data-act="fclose" aria-label="ปิด">×</button></div>
+    <div class="sheet-top"><h2 id="f-title">เพิ่มสมาชิก</h2><button class="x" type="button" data-act="fclose" aria-label="ปิด">×</button></div>
     <form id="pf" novalidate>
       <p class="form-note">ช่องที่ต้องกรอกมีแค่ <b>ชื่อจริง</b> หรือ <b>ชื่อเล่น</b> ช่องอื่นใส่เท่าที่ทราบ แก้ไขภายหลังได้</p>
       <fieldset>
@@ -787,7 +790,7 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
           <label class="field" for="f-nick"><span>ชื่อเล่น</span><input id="f-nick" autocomplete="off"></label>
           <label class="field" for="f-first"><span>ชื่อจริง</span><span class="combo"><input id="f-first" data-combo="first" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกชื่อจริง">▾</button></span></label>
           <label class="field" for="f-last"><span>นามสกุล</span><span class="combo"><input id="f-last" data-combo="sur" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกนามสกุล">▾</button></span></label>
-          <label class="field" for="f-gender"><span>เพศ</span><select id="f-gender"><option value="">ไม่ระบุ</option><option>ชาย</option><option>หญิง</option></select></label>
+          <label class="field" for="f-gender"><span>เพศ</span><select id="f-gender"><option value="">—</option><option>ชาย</option><option>หญิง</option></select></label>
           <label class="field" for="f-status"><span>สถานะภาพ</span><select id="f-status"></select></label>
           <span class="brk"></span>
           <label class="field" for="f-job"><span>อาชีพ</span><span class="combo"><input id="f-job" data-combo="job" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกอาชีพ">▾</button></span></label>
@@ -826,7 +829,7 @@ legend small{font-size:.78rem;font-weight:400;color:var(--muted)}
       <fieldset>
         <legend><span class="n">6</span>สถานภาพสมรส / คู่สมรส</legend>
         <div class="grid">
-          <label class="field" for="f-mar"><span>สถานภาพ</span><span class="combo"><input id="f-mar" data-combo="mar" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกสถานภาพการแต่งงาน">▾</button></span></label>
+          <label class="field" for="f-mar"><span>สถานภาพสมรส</span><span class="combo"><input id="f-mar" data-combo="mar" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือกสถานภาพสมรส">▾</button></span></label>
         </div>
         <div class="mrows" id="sp-rows"></div>
         <button type="button" class="btn sm addrow" data-addrow="sp">+ เพิ่มคู่สมรสอีกคน</button>
@@ -948,7 +951,9 @@ const parentsOf=p=>[p.fatherId,p.motherId].filter(id=>id&&F.byId.has(id));
 const kidsOf=id=>F.kids.get(id)||[];
 const spousesOf=id=>F.sp.get(id)||[];
 // สถานะคู่สมรส: เรียงตรงกับรหัสคู่สมรส (สมรส / หย่าร้าง / คู่สมรสเสียชีวิต)
-const SP_ST=['สมรส','หย่าร้าง','คู่สมรสเสียชีวิต'];
+const SP_ST_DEF=['สมรส','หย่าร้าง','คู่สมรสเสียชีวิต'];
+// ตัวเลือกสถานะคู่สมรส: จากชีต admin คอลัมน์ "สถานะคู่สมรส" ถ้าว่างใช้ค่าเริ่มต้น
+const spStList=()=>S.lists&&S.lists.spouseStatus&&S.lists.spouseStatus.length?S.lists.spouseStatus:SP_ST_DEF;
 const stOf=(x,id)=>{if(!x)return '';const i=(x.spouseIds||[]).indexOf(id);if(i<0)return '';const v=String(x.spouseStatus||'').split(',').map(t=>t.trim())[i]||'';return v==='–'?'':v;};
 const spStatus=(id,sid)=>stOf(P(id),sid)||stOf(P(sid),id)||'สมรส';
 const curSpouses=id=>spousesOf(id).filter(s=>spStatus(id,s)==='สมรส');
@@ -1058,7 +1063,8 @@ function clanMenu(show){
     // ซึ่งอาจถูกนับเป็น "ตระกูล" โดยบังเอิญจาก laneOf() แต่ไม่ใช่ตระกูลหลักของผัง
     const names=clanNames();
     const rows=names.map(name=>[name,counts.get(name)||0]).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'th'));
-    m.innerHTML=rows.length?rows.map(([name,n])=>`<button type="button" class="row${name===active?' main':''}" data-clanview="${esc(name)}"><span>${esc(name)}</span><span class="n">${n} คน</span></button>`).join(''):'<div class="empty">ยังไม่มีข้อมูล</div>';
+    m.innerHTML=(rows.length?rows.map(([name,n])=>`<button type="button" class="row${name===active?' main':''}" data-clanview="${esc(name)}"><span>${esc(name)}</span><span class="n">${n} คน</span></button>`).join(''):'<div class="empty">ยังไม่มีข้อมูล</div>')
+      +(isAdmin()?`<div class="sep"></div>${rows.length?'<button type="button" class="row act del" data-act="clandel">🗑 ลบตระกูล</button>':''}<button type="button" class="row act" data-act="clanrestore">↺ กู้คืนตระกูล</button>`:'');
   }
   m.hidden=!willShow;btn.setAttribute('aria-expanded',String(willShow));
 }
@@ -1127,7 +1133,7 @@ function render(){
   requestAnimationFrame(()=>applyZoom(false));
   tree.querySelectorAll('img').forEach(i=>{if(!i.complete)i.addEventListener('load',()=>requestAnimationFrame(drawLinks),{once:true});});
 }
-function spIcon(st){return st==='สมรส'?'💍':st==='หย่าร้าง'?'💔':'🕊️';}
+function spIcon(st){return st==='สมรส'?'💍':st==='หย่าร้าง'?'💔':'🖤';}
 const ADJ=new Set(); // คู่สมรสที่การ์ดอยู่ติดกัน (มีแหวนคั่นแล้ว)
 function cellHtml(arr){
   let out='';
@@ -1187,9 +1193,62 @@ function fitZoom(){
   const min=innerWidth<=760?.45:.5; // มือถือย่อได้มากกว่า แต่ไม่ให้เล็กจนอ่านไม่ออก
   return Math.max(min,Math.min(1,(wrap.clientWidth-4)/w));
 }
+// จัดช่องให้ลูกอยู่ใต้กึ่งกลางพ่อแม่ และพ่อแม่อยู่เหนือกึ่งกลางลูก เส้นโยงจะลงตรงและแตกซ้ายขวาสมมาตร
+// ขยับซ้าย/ขวาได้เท่าที่ไม่ทับช่องข้างๆ วนหลายรอบจนตำแหน่งนิ่ง แล้วเลื่อนทั้งผังให้ชิดซ้ายเหมือนเดิม
+function alignCells(){
+  const chart=$('chart');if(!chart)return;
+  const prevZ=chart.style.zoom;chart.style.zoom=1;
+  const rcs=[...chart.querySelectorAll('.row-cells')];
+  rcs.forEach(rc=>rc.querySelectorAll(':scope>.cell').forEach(c=>c.style.marginLeft=''));
+  const where=new Map(); // id -> {cell, off(กึ่งกลางการ์ดจากขอบซ้ายช่อง)}
+  const rows=rcs.map((rc,ri)=>{const gap=parseFloat(getComputedStyle(rc).columnGap)||0,base=rc.getBoundingClientRect().left;
+    const cells=[...rc.querySelectorAll(':scope>.cell')].map(el=>{const r=el.getBoundingClientRect();
+      const c={el,ri,L:r.left-base,w:r.width,ids:[]};
+      el.querySelectorAll('.card[data-id]').forEach(k=>{const kr=k.getBoundingClientRect();where.set(k.dataset.id,{c,off:(kr.left+kr.right)/2-r.left});c.ids.push(k.dataset.id);});
+      return c;});
+    return {gap,cells};});
+  const X=id=>{const w=where.get(id);return w.c.L+w.off;};
+  const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  const parentsIn=id=>{const p=P(id);return p?[p.fatherId,p.motherId].filter(x=>x&&where.has(x)&&where.get(x).c.ri<where.get(id).c.ri&&where.get(x).c!==where.get(id).c):[];};
+  // พี่น้อง (รวมพี่น้องต่างแม่/ต่างพ่อ) ที่อยู่คนละช่อง วางชิดกันเท่าระยะการ์ด ไม่ต้องเว้นช่องกว้าง
+  const sib=(a,b)=>a.ids.some(x=>{const p=P(x);return p&&b.ids.some(y=>{const q=P(y);return q&&((p.fatherId&&p.fatherId===q.fatherId)||(p.motherId&&p.motherId===q.motherId));});});
+  const gapOf=(row,a,b)=>sib(a,b)?Math.min(row.gap,16):row.gap;
+  const pack=row=>{for(let i=1;i<row.cells.length;i++){const a=row.cells[i-1],c=row.cells[i];c.L=Math.max(c.L,a.L+a.w+gapOf(row,a,c));}};
+  const prevR=(row,c)=>{const i=row.cells.indexOf(c);if(i<1)return -Infinity;const a=row.cells[i-1];return a.L+a.w+gapOf(row,a,c);};
+  const down=()=>{for(const row of rows){for(const c of row.cells){
+      const kids=c.ids.filter(id=>parentsIn(id).length);if(!kids.length)continue;
+      const par=[...new Set(kids.flatMap(parentsIn))];
+      const offs=kids.map(id=>where.get(id).off),kmid=(Math.min(...offs)+Math.max(...offs))/2;
+      push(c,Math.max(prevR(row,c),mean(par.map(X))-kmid));}pack(row);}};
+  let moved=false;const push=(c,want)=>{if(Math.abs(want-c.L)>0.5){c.L=want;moved=true;}};
+  for(let it=0;it<8;it++){
+    moved=false;
+    // บนลงล่าง: ลูกอยู่ใต้กึ่งกลางพ่อแม่
+    for(const row of rows){for(const c of row.cells){
+      const kids=c.ids.filter(id=>parentsIn(id).length);if(!kids.length)continue;
+      const par=[...new Set(kids.flatMap(parentsIn))];
+      const offs=kids.map(id=>where.get(id).off),kmid=(Math.min(...offs)+Math.max(...offs))/2;
+      push(c,Math.max(prevR(row,c),mean(par.map(X))-kmid));}pack(row);}
+    // ล่างขึ้นบน: พ่อแม่อยู่เหนือกึ่งกลางลูก
+    for(let r=rows.length-1;r>=0;r--){const row=rows[r];for(const c of row.cells){
+      // แยกลูกตามคู่พ่อแม่ (เช่น ลูกกับภรรยาคนแรก / คนที่สอง) แล้วเฉลี่ยระยะที่ต้องขยับ
+      const groups=new Map();
+      for(const k of where.keys()){const ps=parentsIn(k);if(!ps.some(x=>where.get(x).c===c))continue;const key=ps.slice().sort().join('|');if(!groups.has(key))groups.set(key,{ps,kids:[]});groups.get(key).kids.push(k);}
+      if(!groups.size)continue;
+      const shifts=[...groups.values()].map(g=>{const xs=g.kids.map(X);return (Math.min(...xs)+Math.max(...xs))/2-mean(g.ps.map(X));});
+      push(c,Math.max(prevR(row,c),c.L+mean(shifts)));}pack(row);}
+    if(!moved)break;
+  }
+  down(); // รอบสุดท้าย: ให้ลูกอยู่ใต้พ่อแม่ก่อนเสมอ
+  const minL=Math.min(...rows.filter(r=>r.cells.length).map(r=>r.cells[0].L));
+  for(const row of rows)for(const c of row.cells)c.L-=minL;
+  for(const row of rows){let prev=null;for(const c of row.cells){const nat=prev===null?0:prev+row.gap,m=c.L-nat;c.el.style.marginLeft=Math.abs(m)>0.5?m+'px':'';prev=c.L+c.w;}}
+  chart.style.zoom=prevZ;
+}
 function applyZoom(save){
   const chart=$('chart'),bar=$('zoombar');if(!chart){if(bar)bar.hidden=true;return;}
   bar.hidden=false;
+  alignCells();
   const z=ZOOM.mode==='fit'?fitZoom():Math.max(ZMIN,Math.min(ZMAX,ZOOM.z));
   chart.style.zoom=z;S.zoom=z;
   $('zv').textContent=Math.round(z*100)+'%';
@@ -1343,7 +1402,7 @@ function showSlide(dir){
         <dt>วันเกิด</dt><dd>${esc(birthText(p.birth))}</dd>
         <dt>อายุ</dt><dd>${esc(ageText(p))}</dd>
         <dt>อาชีพ</dt><dd>${esc(p.job||'–')}</dd>
-        <dt>การแต่งงาน</dt><dd>${esc(p.marriage||'–')}</dd>
+        <dt>สถานภาพสมรส</dt><dd>${esc(p.marriage||'–')}</dd>
         <dt>ที่อยู่ปัจจุบัน</dt><dd>${esc(addrText(p))}</dd>
         ${relRow('พ่อ',parentsOf(p).filter(x=>x===p.fatherId),[p.fatherNick,[p.fatherFirst,p.fatherLast].filter(Boolean).join(' ')].filter(Boolean).join(' · '))}
         ${relRow('แม่',parentsOf(p).filter(x=>x===p.motherId),[p.motherNick,[p.motherFirst,p.motherLast].filter(Boolean).join(' ')].filter(Boolean).join(' · '))}
@@ -1422,7 +1481,7 @@ async function load(){
   const j=await api('get');
   if(!j.ok)throw new Error(j.error||'load');
   S.user=j.user;S.lockedOut=!!j.locked;if(j.user&&j.user.open)S.guestOK=true;S.people=j.people||[];S.geoVersion=j.geoVersion;
-  const l=j.lists||{};S.lists={terms:l.terms?.length?l.terms:DEFAULT_LISTS.terms,status:l.status?.length?l.status:DEFAULT_LISTS.status,jobs:l.jobs||[],marriage:l.marriage||[],surnames:l.surnames||[],clans:l.clans||[],siblingStatus:l.siblingStatus||[]};
+  const l=j.lists||{};S.lists={terms:l.terms?.length?l.terms:DEFAULT_LISTS.terms,status:l.status?.length?l.status:DEFAULT_LISTS.status,jobs:l.jobs||[],marriage:l.marriage||[],surnames:l.surnames||[],clans:l.clans||[],siblingStatus:l.siblingStatus||[],spouseStatus:l.spouseStatus||[]};
 }
 function showLogin(pop){const g=$('gate');g.classList.toggle('pop',!!pop);$('gatex').hidden=!pop;g.hidden=false;$('lerr').hidden=true;$('lu').focus();}
 function hideLogin(){const g=$('gate');g.hidden=true;g.classList.remove('pop');}
@@ -1470,7 +1529,7 @@ function opts(arr,sel,ph){const a=[...arr];if(sel&&!a.includes(sel))a.push(sel);
 function uniq(a){return [...new Set(a.filter(Boolean))];}
 const REL_TITLE={father:'เพิ่มพ่อของ',mother:'เพิ่มแม่ของ',sibling:'เพิ่มพี่น้องของ',spouse:'เพิ่มคู่สมรสของ',child:'เพิ่มลูกของ'};
 function relDefaults(rel,of){
-  const d={status:S.lists.status[0]||'มีชีวิต',spouseIds:[]};if(!of)return d;
+  const d={status:'',spouseIds:[]};if(!of)return d;
   const sp=[...curSpouses(of.id),...exSpouses(of.id)].map(P);
   if(rel==='father'){Object.assign(d,{gender:'ชาย',last:of.last,clan:of.clan||of.last});if(of.motherId)d.spouseIds=[of.motherId];}
   if(rel==='mother'){Object.assign(d,{gender:'หญิง',last:of.last});if(of.fatherId)d.spouseIds=[of.fatherId];}
@@ -1508,7 +1567,7 @@ function fillParent(pre,listId,p,excl,filter){
 }
 /* ---------- พี่น้อง / ลูก หลายคน ---------- */
 let tmpSeq=0;
-const lifeOpts=sel=>opts(S.lists.status,sel||'','— ไม่ระบุ —');
+const lifeOpts=sel=>opts(S.lists.status,sel||'','—');
 const comboField=(cls,kind,lab)=>`<span class="combo"><input class="${cls}" data-combo="${kind}" autocomplete="off" placeholder="เลือกหรือพิมพ์"><button type="button" class="combo-btn" tabindex="-1" aria-label="เลือก${lab}">▾</button></span>`;
 function buildPP(pre,excl){
   const list=S.people.filter(x=>x.id!==excl).sort((a,b)=>laneOf(a).localeCompare(laneOf(b),'th')||byBirth(a,b));
@@ -1520,24 +1579,23 @@ function addRow(pre,d={}){
   r.innerHTML=`<label class="field"><span>ชื่อเล่น</span><input class="m-nick" autocomplete="off"></label>
     <label class="field"><span>ชื่อจริง</span>${comboField('m-first',pre,WHO[pre])}</label>
     <label class="field"><span>นามสกุล</span>${comboField('m-last','sur','นามสกุล')}</label>
-    ${pre==='sp'?`<label class="field"><span>สถานะ</span><select class="m-st"><option value="">— ไม่ระบุ —</option>${SP_ST.map(x=>`<option>${x}</option>`).join('')}</select></label>`
+    ${pre==='sp'?`<label class="field"><span>สถานะคู่สมรส</span><select class="m-st">${opts(spStList(),d.st||'','—')}</select></label>`
       :pre==='sb'?`<label class="field"><span>สถานะพี่น้อง</span>${comboField('m-st','sbst','สถานะพี่น้อง')}</label>`:''}
     <label class="field"><span>สถานะภาพ</span><select class="m-life">${lifeOpts(d.life)}</select></label>
     <button type="button" class="rm" title="เอาออก" aria-label="เอาแถวนี้ออก">×</button>
     <p class="tag"></p>`;
   box.appendChild(r);
   r.querySelector('.m-nick').value=d.nick||'';r.querySelector('.m-first').value=d.first||'';r.querySelector('.m-last').value=d.last||'';
-  if(pre==='sp')r.querySelector('.m-st').value=SP_ST.includes(d.st)?d.st:'';
   if(pre==='sb')r.querySelector('.m-st').value=d.st||'';
   rowTag(r);if(pre==='sp')lockSpouse();return r;
 }
-// สถานะ "คู่สมรสเสียชีวิต": สถานะภาพของคู่สมรสต้องเป็น เสียชีวิต และล็อกไว้
+// สถานะคู่สมรสที่มีคำว่า "เสียชีวิต": สถานะภาพของคู่สมรสต้องเป็น เสียชีวิต และล็อกไว้
 function spDeadSync(r){
   const st=r.querySelector('.m-st'),life=r.querySelector('.m-life');if(!st||!life||r.dataset.pre!=='sp')return;
-  const dead=st.value==='คู่สมรสเสียชีวิต';
+  const dead=/เสียชีวิต/.test(st.value);
   if(dead){if(life.dataset.prev===undefined)life.dataset.prev=life.value;life.value='เสียชีวิต';}
   else if(life.dataset.prev!==undefined){life.value=life.dataset.prev;delete life.dataset.prev;}
-  life.disabled=dead||isSingle();life.title=dead?'ล็อกไว้เพราะสถานะเป็นคู่สมรสเสียชีวิต':'';
+  life.disabled=dead||isSingle();life.title=dead?'ล็อกไว้เพราะสถานะคู่สมรสเป็นเสียชีวิต':'';
 }
 function rowTag(r){const x=r.dataset.pid&&P(r.dataset.pid);r.querySelector('.tag').textContent=x?`โยงกับการ์ด ${displayName(x)} ในผังแล้ว`:'';}
 function pickRow(r){
@@ -1620,7 +1678,7 @@ async function openForm(id,rel,ofId){
   const of=ofId?P(ofId):null;
   const p=id?S.people.find(x=>x.id===id):relDefaults(rel,of);
   S.form={id:id||null,photo:p.photo||'',rel:id?null:rel||null,of:ofId||null,oldSpouses:id?[...spousesOf(id)]:[],oldSt:id?Object.fromEntries(spousesOf(id).map(s=>[s,spStatus(id,s)])):{}};
-  $('f-title').textContent=id?`แก้ไขข้อมูล ${displayName(p)}`:rel&&of?`${REL_TITLE[rel]} ${displayName(of)}`:'เพิ่มญาติ';
+  $('f-title').textContent=id?`แก้ไขข้อมูล ${displayName(p)}`:rel&&of?`${REL_TITLE[rel]} ${displayName(of)}`:'เพิ่มสมาชิก';
   $('f-clan').value=p.clan||p.last||'';S.form.clanAuto=!p.clan||p.clan===p.last;lockClan(S.clanView);$('f-gender').value=p.gender||'';
   S.form.pick={};
   fillParent('fa','dl-father',p,id);
@@ -1632,17 +1690,17 @@ async function openForm(id,rel,ofId){
   // คำเรียกญาติ: รายการจากชีต admin รวมกับคำที่เคยพิมพ์ไว้ในผัง
   S.terms=uniq([...S.lists.terms,...S.people.map(x=>x.term)].map(x=>String(x||'').trim()));
   $('f-term').value=p.term||'';
-  $('f-status').innerHTML=opts(S.lists.status,p.status,'— ไม่ระบุ —');
+  $('f-status').innerHTML=opts(S.lists.status,p.status,'—');
   $('f-nick').value=p.nick||'';$('f-first').value=p.first||'';$('f-last').value=p.last||'';
-  $('f-bd').innerHTML='<option value="">–</option>'+Array.from({length:31},(_,i)=>`<option value="${i+1}"${p.birth?.d===i+1?' selected':''}>${i+1}</option>`).join('');
-  $('f-bm').innerHTML='<option value="">–</option>'+MONTHS.map((m,i)=>`<option value="${i+1}"${p.birth?.m===i+1?' selected':''}>${m}</option>`).join('');
+  $('f-bd').innerHTML='<option value="">—</option>'+Array.from({length:31},(_,i)=>`<option value="${i+1}"${p.birth?.d===i+1?' selected':''}>${i+1}</option>`).join('');
+  $('f-bm').innerHTML='<option value="">—</option>'+MONTHS.map((m,i)=>`<option value="${i+1}"${p.birth?.m===i+1?' selected':''}>${m}</option>`).join('');
   $('f-by').value=p.birth?.y||'';$('f-age').value=p.age||'';
   $('dl-job').innerHTML=uniq([...S.lists.jobs,...S.people.map(x=>x.job)]).map(n=>`<option value="${esc(n)}">`).join('');
   $('dl-mar').innerHTML=uniq([...S.lists.marriage,...S.people.map(x=>x.marriage)]).map(n=>`<option value="${esc(n)}">`).join('');
   $('f-job').value=p.job||'';$('f-mar').value=p.marriage||'';lockSpouse();$('f-tam').value=p.tambon||'';$('f-vil').value=p.village||'';
   $('f-err').hidden=true;$('f-save').disabled=false;$('f-save').textContent='บันทึก';
   renderFormPhoto();autoAge();
-  $('formwrap').hidden=false;document.body.classList.add('locked');comboSkip=true;$('f-first').focus({preventScroll:true});comboSkip=false;
+  $('formwrap').hidden=false;document.querySelectorAll('#formwrap .sheet,#pf').forEach(el=>el.scrollTop=0);document.body.classList.add('locked');comboSkip=true;$('f-first').focus({preventScroll:true});comboSkip=false;
   // จังหวัด อำเภอ ตำบล
   const h=$('f-geo-h');
   fillProv(p.province);fillAmp(p.amphoe);
@@ -1854,7 +1912,7 @@ function comboOpen(input,all){
   const kind=input.dataset.combo,isTerm=kind==='term',isGeo=['prov','amp','tam'].includes(kind);
   const isPerson=['fa','mo','sp','sb','ch'].includes(kind);
   const src=isTerm?(S.terms||[]):kind==='sur'?allLast():isGeo?geoList(kind):kind==='first'?allFirst():kind==='job'?uniq([...S.lists.jobs,...S.people.map(x=>x.job)]):kind==='mar'?uniq([...S.lists.marriage,...S.people.map(x=>x.marriage)]):kind==='sbst'?uniq([...(S.lists.siblingStatus||[]),...S.people.flatMap(x=>splitList(x.siblingStatus))]).filter(x=>x&&x!=='–'):isPerson?personSrc(kind):(S.surnames||[]);
-  const what={term:'คำเรียกญาติ',prov:'จังหวัด',amp:'อำเภอ/เขต',tam:'ตำบล/แขวง',first:'ชื่อจริง',job:'อาชีพ',mar:'การแต่งงาน',fa:'ชื่อพ่อ',mo:'ชื่อแม่',sp:'ชื่อคู่สมรส',sb:'ชื่อพี่น้อง',sbst:'สถานะพี่น้อง',ch:'ชื่อลูก'}[kind]||'นามสกุล';
+  const what={term:'คำเรียกญาติ',prov:'จังหวัด',amp:'อำเภอ/เขต',tam:'ตำบล/แขวง',first:'ชื่อจริง',job:'อาชีพ',mar:'สถานภาพสมรส',fa:'ชื่อพ่อ',mo:'ชื่อแม่',sp:'ชื่อคู่สมรส',sb:'ชื่อพี่น้อง',sbst:'สถานะพี่น้อง',ch:'ชื่อลูก'}[kind]||'นามสกุล';
   const q=input.value.trim().toLowerCase(),list=src.filter(x=>all||!q||x.toLowerCase().includes(q));
   const ul=document.createElement('ul');ul.className='combo-list';ul.setAttribute('role','listbox');
   let html='';
@@ -1917,6 +1975,74 @@ $('optform').addEventListener('submit',async e=>{
 $('optwrap').addEventListener('click',e=>{if(e.target.id==='optwrap')closeOpt();});
 document.addEventListener('mousedown',e=>{if(!e.target.closest('.addopt'))optMenu(false);});
 document.addEventListener('mousedown',e=>{if(!e.target.closest('#clanbtn,#clanmenu'))clanMenu(false);});
+
+/* ---------- ลบตระกูล / กู้คืนตระกูล (เฉพาะผู้ดูแล) ---------- */
+// ใช้เกณฑ์เดียวกับ Code.gs: คนในตระกูล + คู่สมรสที่แต่งเข้ามาซึ่งไม่ได้อยู่ตระกูลอื่นที่ตั้งไว้ และคู่สมรสทุกคนถูกลบด้วย
+function clanMembersLocal(clan){
+  const listed=(S.lists.clans||[]).map(x=>String(x||'').trim()),del=new Map();
+  const keep=[];
+  // คนในตระกูลที่แต่งงานหรือมีลูกอยู่ในตระกูลอื่น ไม่ลบ (เช่น ลูกสาวที่แต่งออกไปเป็นแม่ของคนตระกูลอื่น)
+  for(const p of S.people){if(laneOf(p)!==clan)continue;
+    const out=[...spousesOf(p.id),...kidsOf(p.id)].map(P).filter(Boolean).some(q=>laneOf(q)!==clan);
+    if(out)keep.push(p.id);else del.set(p.id,'blood');}
+  del.keep=keep;
+  for(const p of S.people){if(del.has(p.id)||listed.includes(laneOf(p)))continue;
+    const sps=spousesOf(p.id);if(sps.length&&sps.every(id=>del.has(id))&&!p.fatherId&&!p.motherId)del.set(p.id,'inlaw');}
+  return del;
+}
+let DEMO_TRASH=[];
+function showClanWrap(){$('clanwrap').hidden=false;document.body.classList.add('locked');}
+function closeClan(){$('clanwrap').hidden=true;if($('detail').hidden&&$('formwrap').hidden&&$('histwrap').hidden&&$('optwrap').hidden&&$('userwrap').hidden)document.body.classList.remove('locked');}
+function openClanDel(clan){
+  const names=clanNames();clan=clan||S.clanView||names[0]||'';
+  const del=clanMembersLocal(clan),ppl=[...del.keys()].map(P).filter(Boolean);
+  $('c-title').textContent='ลบตระกูล';
+  $('c-body').innerHTML=`<label class="field"><span>เลือกตระกูลที่จะลบ</span><select id="c-clan">${names.map(n=>`<option${n===clan?' selected':''}>${esc(n)}</option>`).join('')}</select></label>
+    ${del.keep.length?`<p class="hint">ไม่ลบ ${del.keep.map(id=>'<b>'+esc(displayName(P(id)))+'</b>').join(', ')} เพราะแต่งงานหรือมีลูกอยู่ในตระกูลอื่น จะยังแสดงในผังของตระกูลนั้น</p>`:''}
+    <p class="warn">จะลบ <b>${ppl.length} คน</b> ออกจากผัง พร้อมเอาชื่อตระกูล "<b>${esc(clan)}</b>" ออกจากตัวเลือก<br>ข้อมูลไม่ได้หายถาวร ระบบเก็บไว้ในชีต "ตระกูลที่ลบ" กู้คืนได้จากเมนู "กู้คืนตระกูล"</p>
+    ${ppl.length?`<div class="names">${ppl.map(p=>`<span${del.get(p.id)==='inlaw'?' class="il" title="คู่สมรสที่แต่งเข้ามา"':''}>${esc(displayName(p))}</span>`).join('')}</div>`:'<p class="muted">ตระกูลนี้ยังไม่มีสมาชิก</p>'}
+    <label class="field"><span>พิมพ์ชื่อตระกูล "${esc(clan)}" เพื่อยืนยัน</span><input id="c-confirm" autocomplete="off"></label>
+    <p class="err" id="c-err" hidden></p>
+    <div class="acts"><button class="btn ghost" type="button" data-act="cclose">ยกเลิก</button><button class="btn danger solid" type="button" data-act="cdo" id="c-do" disabled>ลบตระกูล</button></div>`;
+  S.cdel={clan,count:ppl.length};
+  $('c-clan').onchange=e=>openClanDel(e.target.value);
+  $('c-confirm').oninput=e=>{$('c-do').disabled=e.target.value.trim()!==clan;};
+  showClanWrap();$('c-confirm').focus();
+}
+async function doClanDelete(){
+  const {clan}=S.cdel||{},btn=$('c-do'),err=$('c-err');if(!clan||$('c-confirm').value.trim()!==clan)return;
+  btn.disabled=true;btn.textContent='กำลังลบ…';err.hidden=true;
+  try{
+    if(DEMO){const del=clanMembersLocal(clan),gone=S.people.filter(p=>del.has(p.id));
+      DEMO_TRASH.unshift({batch:'C'+Date.now(),clan,t:Date.now(),by:'ตัวอย่าง',count:gone.length,names:gone.map(displayName),_people:JSON.parse(JSON.stringify(gone)),_clans:(S.lists.clans||[]).slice()});
+      S.people=S.people.filter(p=>!del.has(p.id));S.lists.clans=(S.lists.clans||[]).filter(c=>c!==clan);}
+    else{const j=await api('deleteClan',{clan});if(!j.ok)throw new Error(j.error);await load();}
+    if(S.clanView===clan)S.clanView=null;
+    closeClan();render();toast(`ลบตระกูล "${clan}" แล้ว กู้คืนได้จากเมนูกู้คืนตระกูล`);
+  }catch(x){if(x.message!=='auth'){err.hidden=false;err.textContent=x.message==='forbidden'?'เฉพาะผู้ดูแล (Edit + Full) เท่านั้นที่ลบตระกูลได้':x.message==='empty'?'ไม่พบสมาชิกของตระกูลนี้':'ลบไม่สำเร็จ ลองอีกครั้ง';}
+    btn.disabled=false;btn.textContent='ลบตระกูล';}
+}
+function renderTrash(items){
+  $('c-body').innerHTML=!items?'<p class="muted">กำลังโหลด…</p>':!items.length?'<p class="muted">ยังไม่มีตระกูลที่ถูกลบ</p>':
+    `<p class="hint">ตระกูลที่เคยลบ เลือกกู้คืนแล้วสมาชิกทั้งหมดจะกลับเข้าผังพร้อมเส้นโยงเดิม</p>`+items.map(it=>`<div class="tr"><b>${esc(it.clan)}</b><button class="btn primary" type="button" data-act="crestore" data-batch="${esc(it.batch)}">กู้คืน</button>
+      <small>${it.count} คน · ลบเมื่อ ${it.t?new Date(it.t).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'–'}${it.by?' · โดย '+esc(it.by):''}</small>
+      ${it.names&&it.names.length?`<div class="names">${it.names.map(n=>`<span>${esc(n)}</span>`).join('')}${it.count>it.names.length?`<span class="il">+${it.count-it.names.length}</span>`:''}</div>`:''}</div>`).join('')+`<p class="err" id="c-err" hidden></p>`;
+}
+function openClanRestore(){
+  $('c-title').textContent='กู้คืนตระกูล';renderTrash(null);showClanWrap();
+  if(DEMO)renderTrash(DEMO_TRASH);
+  else api('listTrash').then(j=>renderTrash(j.ok?j.items||[]:[])).catch(()=>renderTrash([]));
+}
+async function doClanRestore(batch){
+  const btn=document.querySelector(`[data-act=crestore][data-batch="${CSS.escape(batch)}"]`);if(btn){btn.disabled=true;btn.textContent='กำลังกู้คืน…';}
+  try{
+    let clan;
+    if(DEMO){const it=DEMO_TRASH.find(x=>x.batch===batch);clan=it.clan;S.people=S.people.concat(it._people);if(!(S.lists.clans||[]).includes(clan))S.lists.clans=[...(S.lists.clans||[]),clan];DEMO_TRASH=DEMO_TRASH.filter(x=>x!==it);}
+    else{const j=await api('restoreClan',{batch});if(!j.ok)throw new Error(j.error);clan=j.clan;await load();}
+    S.clanView=clan;closeClan();render();toast(`กู้คืนตระกูล "${clan}" แล้ว`);
+  }catch(x){if(x.message!=='auth'){const err=$('c-err');if(err){err.hidden=false;err.textContent=x.message==='not_found'?'รายการนี้ถูกกู้คืนไปแล้ว':'กู้คืนไม่สำเร็จ ลองอีกครั้ง';}if(btn){btn.disabled=false;btn.textContent='กู้คืน';}}}
+}
+$('clanwrap').addEventListener('click',e=>{if(e.target.id==='clanwrap')closeClan();});
 
 /* ---------- เพิ่มสิทธิ์การใช้งาน (เฉพาะผู้ดูแล) ---------- */
 let DEMO_USERS=[{name:'admin',role:'edit',clans:[]},{name:'user',role:'view',clans:['พรมเมือง']}];
@@ -2009,6 +2135,11 @@ document.addEventListener('click',async e=>{
   if(act==='logout')logout(false);
   else if(act==='history')openHistory();
   else if(act==='optmenu')optMenu();
+  else if(act==='clandel'){clanMenu(false);openClanDel();}
+  else if(act==='clanrestore'){clanMenu(false);openClanRestore();}
+  else if(act==='cclose')closeClan();
+  else if(act==='cdo')doClanDelete();
+  else if(act==='crestore')doClanRestore(a.dataset.batch);
   else if(act==='users')openUsers();
   else if(act==='viewmode'){setCompact(!S.compact);applyZoom(false);requestAnimationFrame(drawLinks);toast(S.compact?'มุมมองที่ 2: รูปกับชื่อเล่น':'มุมมองที่ 1: ข้อมูลเต็ม');}
   else if(act==='uclose')closeUsers();
@@ -2033,6 +2164,7 @@ $('d-prev').onclick=()=>{stopPlay();go(-1);};
 $('d-next').onclick=()=>{stopPlay();go(1);};
 $('detail').addEventListener('click',e=>{if(e.target.id==='detail')closeDetail();});
 document.addEventListener('keydown',e=>{
+  if(!$('clanwrap').hidden){if(e.key==='Escape')closeClan();return;}
   if(!$('userwrap').hidden){if(e.key==='Escape')closeUsers();return;}
   if(!$('optwrap').hidden){if(e.key==='Escape')closeOpt();return;}
   if(!$('histwrap').hidden){if(e.key==='Escape')closeHistory();return;}
