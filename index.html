@@ -1416,8 +1416,8 @@ try{const v=JSON.parse(localStorage.getItem('rel-zoom')||'null');if(v&&(v.mode==
 function fitZoom(){
   const wrap=$('chartwrap'),chart=$('chart');if(!wrap||!chart)return 1;
   const prev=chart.style.zoom;chart.style.zoom=1;const w=chart.scrollWidth;chart.style.zoom=prev;
-  const min=innerWidth<=760?.45:.5; // มือถือย่อได้มากกว่า แต่ไม่ให้เล็กจนอ่านไม่ออก
-  return Math.max(min,Math.min(1,(wrap.clientWidth-4)/w));
+  // พอดีจอ = เห็นการ์ดครบทุกใบในแนวนอน (ไม่จำกัดขั้นต่ำ) ส่วนที่ล้นลงล่างให้เลื่อนดูเอา
+  return Math.max(.05,Math.min(1,(wrap.clientWidth-4)/w));
 }
 // จัดตำแหน่งให้ลูกอยู่ใต้กึ่งกลางพ่อแม่ และพ่อแม่อยู่เหนือกึ่งกลางลูก (แต่ละช่อง = คน + คู่สมรส)
 // ลูกพ่อแม่เดียวกันขยับไปพร้อมกันเป็นกลุ่ม ไม่ให้ช่องทับกัน วนหลายรอบจนตำแหน่งนิ่ง แล้วเลื่อนทั้งผังให้ชิดซ้าย
