@@ -1241,18 +1241,28 @@ function clanNames(){
   const all=uniq((S.lists.clans||[]).map(x=>String(x||'').trim())).filter(Boolean),ok=allowedClans();
   return ok||all;
 }
+// จำนวนคู่สมรสที่แสดงอยู่ในผัง (ไม่นับคู่สมรสที่ไม่ได้อยู่ในตระกูลที่ดู) ใช้จัดตำแหน่งการ์ดและเส้นโยง
+const nSp=id=>spousesOf(id).filter(x=>!S.viewIds||S.viewIds.has(x)).length;
 function clanFilterPeople(){return S.clanView?peopleOfClans([S.clanView]):S.people;}
 function peopleOfClans(clans){
-  const blood=S.people.filter(p=>clans.includes(laneOf(p)));
-  const bloodIds=new Set(blood.map(p=>p.id));
-  // ลูกที่เกิดจากคนในตระกูล แต่ย้ายชื่อต้นตระกูลไปตามคู่สมรสแล้ว (เช่น ลูกสาวที่แต่งงานออกไป) ยังแสดงในตระกูลเดิม
-  // และคู่สมรสของเขาก็แสดงด้วย คนเดียวจึงอยู่ได้ทั้งสองตระกูล
-  // รวมลูกหลานทุกชั้นของคนในตระกูลด้วย (เช่น ลูกของแก้วกับพี) วนจนไม่มีใครเพิ่ม
-  const born=[];
-  for(let grew=true;grew;){grew=false;
-    for(const p of S.people)if(!bloodIds.has(p.id)&&(bloodIds.has(p.fatherId)||bloodIds.has(p.motherId))){bloodIds.add(p.id);born.push(p);grew=true;}}
+  // คนในตระกูล (สายเลือด) = ต้นตระกูล + ลูกหลานทุกชั้น ส่วนคู่สมรสที่แต่งเข้ามาแสดงเฉพาะตัวเขา
+  // ไม่รวมคู่สมรสคนอื่นของเขา และลูกที่เกิดกับคนนอกตระกูล (แม้ชื่อต้นตระกูลของเขาจะถูกบันทึกเป็นตระกูลนี้)
+  const inClan=p=>!!p&&clans.includes(laneOf(p));
+  const pars=p=>[P(p.fatherId),P(p.motherId)].filter(Boolean);
+  let roots=S.people.filter(p=>inClan(p)&&!pars(p).some(inClan));
+  let bloodIds;
+  for(let k=0;k<20;k++){
+    bloodIds=new Set(roots.map(p=>p.id));
+    for(let grew=true;grew;){grew=false;
+      for(const p of S.people)if(!bloodIds.has(p.id)&&(bloodIds.has(p.fatherId)||bloodIds.has(p.motherId))){bloodIds.add(p.id);grew=true;}}
+    // คนที่แต่งงานกับลูกหลานของตระกูล = คนที่แต่งเข้ามา ไม่ใช่ต้นตระกูล (ลูกของเขาก็ไม่ใช่ต้นตระกูลเช่นกัน)
+    const married=q=>spousesOf(q.id).some(s=>bloodIds.has(s)&&pars(P(s)).some(x=>bloodIds.has(x.id)));
+    const next=roots.filter(p=>!married(p)&&!pars(p).some(married));
+    if(next.length===roots.length)break;roots=next;
+  }
+  const blood=S.people.filter(p=>bloodIds.has(p.id));
   const inLaw=S.people.filter(p=>!bloodIds.has(p.id)&&spousesOf(p.id).some(s=>bloodIds.has(s)));
-  return [...blood,...born,...inLaw];
+  return [...blood,...inLaw];
 }
 function clanMenu(show){
   const m=$('clanmenu'),btn=$('clanbtn');if(!m||!btn)return;
@@ -1278,6 +1288,7 @@ function render(){
   if(!S.clanView||!(S.lists.clans||[]).map(x=>String(x||'').trim()).includes(S.clanView))S.clanView=mainClanFromInfo||S.clanView;
   {const ok=allowedClans();if(ok&&!ok.includes(S.clanView))S.clanView=ok[0];}
   const viewPeople=clanFilterPeople();
+  S.viewIds=new Set(viewPeople.map(p=>p.id));
   // ปุ่มตระกูล: แสดงชื่อตระกูลที่เลือกแทนคำว่า "ดูข้อมูลตระกูล"
   $('clanname').textContent=S.clanView||'เลือกตระกูล';$('clanname').classList.toggle('ph',!S.clanView);$('clanbtn').title=S.clanView?`กำลังดูตระกูล ${S.clanView} กดเพื่อเปลี่ยนตระกูล`:'';
   if(!S.people.length){S.order=[];tree.innerHTML=`<div class="empty"><h2>ยังไม่มีญาติในผัง</h2><p>${canEdit()?'กดปุ่ม + มุมขวาล่างเพื่อเพิ่มตัวคุณเองเป็นคนแรก แล้วกดที่รูปเพื่อเพิ่ม พ่อ แม่ พี่น้อง':'ผู้ดูแลผังยังไม่ได้เพิ่มรายชื่อ'}</p></div>`;$('sub').textContent='ยังไม่มีรายชื่อ';return;}
@@ -1446,7 +1457,7 @@ function alignCells(){
   const down=()=>{for(const row of rows){const cs=row.cells;
     for(let i=0;i<cs.length;){const k=keyOf(cs[i]);let j=i+1;if(k)while(j<cs.length&&keyOf(cs[j])===k)j++;
       // พ่อหรือแม่ที่มีคู่สมรสหลายคน: ไม่ต้องจัดลูกให้อยู่กึ่งกลาง ปล่อยให้เยื้องได้
-      const multi=k&&k.split('|').some(id=>spousesOf(id).length>1);
+      const multi=k&&k.split('|').some(id=>nSp(id)>1);
       if(k&&!multi){const kids=cs.slice(i,j).flatMap(c=>c.ids.filter(id=>parentsIn(id).slice().sort().join('|')===k));
         const xs=kids.map(X),mid=(Math.min(...xs)+Math.max(...xs))/2,target=mean(k.split('|').map(X));
         const d=Math.max(target-mid,minL(row,i)-cs[i].L,0);/* ลูกไม่ขยับไปทางซ้าย ให้พ่อแม่เลื่อนมาอยู่เหนือลูกแทน */for(let t=i;t<j;t++)cs[t].L+=d;}
@@ -1466,7 +1477,7 @@ function alignCells(){
       for(let i=1;i<c.ids.length;i++){const pa=c.ids[i-1],sb=c.ids[i];if(!spousesOf(pa).includes(sb))continue;
         const key=[pa,sb].sort().join('|'),kids=[...where.keys()].filter(k=>parentsIn(k).slice().sort().join('|')===key);if(!kids.length)continue;
         const xs=kids.map(X),kmid=(Math.min(...xs)+Math.max(...xs))/2,mid=(X(pa)+X(sb))/2;
-        if(Math.abs(kmid-mid)<=1||spousesOf(pa).length>1||spousesOf(sb).length>1)continue;
+        if(Math.abs(kmid-mid)<=1||nSp(pa)>1||nSp(sb)>1)continue;
         // ช่องที่มีแค่คู่นี้: เลื่อนทั้งคู่ไปอยู่เหนือกึ่งกลางลูก (ไม่แยกคู่ออกจากกัน)
         if(c.ids.length===2){const L0=c.L;c.L=Math.max(minL(row,c.i),c.L+(kmid-mid));if(Math.abs(c.L-L0)>1)moved=true;continue;}
         // ช่องที่มีคู่สมรสหลายคน: ขยายระยะก่อนคู่สมรสคนขวา
@@ -1475,7 +1486,7 @@ function alignCells(){
           const dlt=Math.min(2*(kmid-mid),cap-used);if(dlt<=1)continue;
           c.ids.slice(i).forEach(id=>where.get(id).off+=dlt);c.w+=dlt;(c.gaps||(c.gaps={}))[sb]=used+dlt;moved=true;}}
       // คนที่มีคู่สมรสหลายคน: ไม่แยกคู่ แต่เลื่อนทั้งช่องให้คู่ที่มีลูกมากที่สุดอยู่เหนือกึ่งกลางลูกของคู่นั้น
-      if(c.ids.some(id=>spousesOf(id).length>1)){let best=null;
+      if(c.ids.some(id=>nSp(id)>1)){let best=null;
         for(let i=1;i<c.ids.length;i++){const pa=c.ids[i-1],sb=c.ids[i];if(!spousesOf(pa).includes(sb))continue;
           const key=[pa,sb].sort().join('|'),kids=[...where.keys()].filter(k=>parentsIn(k).slice().sort().join('|')===key);if(!kids.length)continue;
           const xs=kids.map(X),sh=(Math.min(...xs)+Math.max(...xs))/2-(X(pa)+X(sb))/2;
@@ -1555,7 +1566,7 @@ function drawLinks(){
     // มุมมองชิดขอบซ้าย: เส้นลงจากกึ่งกลางพ่อแม่พอดี
     // ลงจากกึ่งกลางพ่อแม่พอดี
     // คนที่มีคู่สมรสหลายคน: ลงตรงจากกึ่งกลางพ่อแม่ถึงเส้นเหนือลูก แล้วต่อไปหาลูกที่เส้นนั้น (ไม่เบนกลางทาง)
-    const multiP=g.ps.length===2&&g.ids.some(id=>spousesOf(id).length>1);
+    const multiP=g.ps.length===2&&g.ids.some(id=>nSp(id)>1);
     x=(a.cx+b.cx)/2;
     // เส้นลงจากพ่อแม่ที่ห่างจากเส้นของลูกไม่เกิน 12px ให้ตรงกันเป็นเส้นเดียว ไม่หักเป็นขั้นเล็กๆ
     const near=xs.find(c=>Math.abs(c-x)<=12);if(near!==undefined)x=near;
@@ -1639,10 +1650,11 @@ function qClose(){$('q-list').hidden=true;$('q').setAttribute('aria-expanded','f
 const USERBTN='<button class="btn hist" type="button" data-act="users">เพิ่มสิทธิ์การใช้งาน</button>';
 const VIEWBTN=()=>`<span class="addopt"><button class="btn hist viewbtn" type="button" data-act="viewmenu" aria-haspopup="menu">เปลี่ยนมุมมองการ์ด ▾</button><span class="optmenu viewmenu" role="menu" hidden>${[1,2].map(i=>`<button type="button" role="menuitemradio" data-view="${i}"${i===S.view?' class="on"':''}>${i}. ${VIEWS[i]}</button>`).join('')}</span></span>`;
 const isAdmin=()=>DEMO||!!(S.user&&S.user.admin);
+const EXPBTN='<span class="addopt"><button class="btn hist" type="button" data-act="expmenu" aria-haspopup="menu">Export ▾</button><span class="optmenu expmenu" role="menu" hidden><button type="button" role="menuitem" data-exp="jpg">บันทึกเป็นรูป (JPG)</button><button type="button" role="menuitem" data-exp="pdf">บันทึกเป็น PDF</button></span></span>';
 const OPTBTN='<span class="addopt"><button class="btn hist" type="button" data-act="optmenu" aria-haspopup="menu">เพิ่มข้อมูล ▾</button><span class="optmenu" role="menu" hidden><button type="button" role="menuitem" data-opt="job">อาชีพ</button><button type="button" role="menuitem" data-opt="surname">นามสกุล</button><button type="button" role="menuitem" data-opt="clan">ชื่อต้นตระกูล</button></span></span>';
 function renderWho(){
   const u=S.user;document.body.classList.toggle('nologin',!DEMO&&!!S.lockedOut);
-  $('who').innerHTML=!DEMO&&!u.open&&u.role!=='edit'?`${VIEWBTN()}<span>เข้าใช้โดย <b>${esc(u.name||'')}</b></span><span class="role">ดูอย่างเดียว</span><button class="btn ghost" type="button" data-act="logout">ออกจากระบบ</button>`:DEMO?`${VIEWBTN()}${OPTBTN}${USERBTN}<button class="btn hist" type="button" data-act="history">ประวัติการแก้ไข</button><span class="role">ตัวอย่าง</span>`:u.open?`<button class="btn login" type="button" data-act="login"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>เข้าสู่ระบบ</button>`:`${VIEWBTN()}${u.role==='edit'?OPTBTN:''}${isAdmin()?USERBTN:''}<button class="btn hist" type="button" data-act="history">ประวัติการแก้ไข</button><span>เข้าใช้โดย <b>${esc(u.name)}</b></span><span class="role">${u.role==='edit'?'แก้ไขได้':'ดูอย่างเดียว'}</span><button class="btn ghost" type="button" data-act="logout">ออกจากระบบ</button>`;
+  $('who').innerHTML=!DEMO&&!u.open&&u.role!=='edit'?`${VIEWBTN()}${EXPBTN}<span>เข้าใช้โดย <b>${esc(u.name||'')}</b></span><span class="role">ดูอย่างเดียว</span><button class="btn ghost" type="button" data-act="logout">ออกจากระบบ</button>`:DEMO?`${VIEWBTN()}${OPTBTN}${USERBTN}<button class="btn hist" type="button" data-act="history">ประวัติการแก้ไข</button>${EXPBTN}<span class="role">ตัวอย่าง</span>`:u.open?`<button class="btn login" type="button" data-act="login"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>เข้าสู่ระบบ</button>`:`${VIEWBTN()}${u.role==='edit'?OPTBTN:''}${isAdmin()?USERBTN:''}<button class="btn hist" type="button" data-act="history">ประวัติการแก้ไข</button>${EXPBTN}<span>เข้าใช้โดย <b>${esc(u.name)}</b></span><span class="role">${u.role==='edit'?'แก้ไขได้':'ดูอย่างเดียว'}</span><button class="btn ghost" type="button" data-act="logout">ออกจากระบบ</button>`;
   const b=$('banner');
   if(DEMO){b.hidden=false;b.innerHTML='<p><b>นี่คือข้อมูลตัวอย่าง</b> เว็บยังไม่ได้เชื่อมกับ Google Sheet ใส่ลิงก์ Apps Script ในไฟล์ index.html ตามชีต "วิธีติดตั้ง" ลองกดที่รูป หรือกดปุ่ม + ได้เลย สิ่งที่เพิ่มในตัวอย่างจะไม่ถูกบันทึก</p>';}
   else b.hidden=true;
@@ -2221,7 +2233,7 @@ document.addEventListener('keydown',e=>{
 
 /* ---------- เพิ่มข้อมูลตัวเลือก (ชีต admin) ---------- */
 const OPT={job:{label:'อาชีพ',key:'jobs'},surname:{label:'นามสกุล',key:'surnames'},clan:{label:'ชื่อต้นตระกูล',key:'clans'}};
-function optMenu(show){const m=document.querySelector('.optmenu:not(.viewmenu)');if(m)m.hidden=show===undefined?!m.hidden:!show;}
+function optMenu(show){const m=document.querySelector('.optmenu:not(.viewmenu):not(.expmenu)');if(m)m.hidden=show===undefined?!m.hidden:!show;}
 function openOpt(kind){
   optMenu(false);S.opt={kind,added:null};const o=OPT[kind];
   $('o-title').textContent=`เพิ่ม${o.label}`;$('o-val').placeholder=`พิมพ์${o.label}ใหม่`;$('o-val').value='';
@@ -2249,11 +2261,57 @@ $('optform').addEventListener('submit',async e=>{
   btn.disabled=false;btn.textContent='เพิ่ม';$('o-val').focus();
 });
 $('optwrap').addEventListener('click',e=>{if(e.target.id==='optwrap')closeOpt();});
-document.addEventListener('mousedown',e=>{if(!e.target.closest('.addopt'))optMenu(false);if(!e.target.closest('.addopt'))viewMenu(false);});
+document.addEventListener('mousedown',e=>{if(!e.target.closest('.addopt'))optMenu(false);if(!e.target.closest('.addopt'))viewMenu(false);if(!e.target.closest('.addopt'))expMenu(false);});
 // เลือกมุมมองการ์ดจาก dropdown
 document.addEventListener('click',e=>{const b=e.target.closest('.viewmenu [data-view]');if(!b)return;
   setView(+b.dataset.view);viewMenu(false);applyZoom(false);requestAnimationFrame(drawLinks);toast(`มุมมองการ์ด: ${VIEWS[S.view]}`);});
 document.addEventListener('mousedown',e=>{if(!e.target.closest('#clanbtn,#clanmenu'))clanMenu(false);});
+
+/* ---------- Export: บันทึกผังเป็นรูป (PNG) / PDF ---------- */
+function expMenu(show){const m=document.querySelector('.expmenu');if(m)m.hidden=show===undefined?!m.hidden:!show;}
+const LIBS={h2c:'https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/html2canvas\/1.4.1\/html2canvas.min.js',pdf:'https:\/\/cdnjs.cloudflare.com\/ajax\/libs\/jspdf\/2.5.1\/jspdf.umd.min.js'};
+const libLoad={};
+function loadLib(k){return libLoad[k]||(libLoad[k]=new Promise((ok,no)=>{const sc=document.createElement('script');sc.src=LIBS[k];sc.onload=ok;sc.onerror=()=>{delete libLoad[k];no(new Error('lib'));};document.head.appendChild(sc);}));}
+function expName(ext){const d=new Date(),z=n=>String(n).padStart(2,'0');
+  return `ผังเครือญาติ${S.clanView?'-'+S.clanView:''}-${d.getFullYear()+543}${z(d.getMonth()+1)}${z(d.getDate())}.${ext}`;}
+async function chartCanvas(){
+  await loadLib('h2c');
+  const chart=$('chart');if(!chart)throw new Error('empty');
+  const prevZ=chart.style.zoom;chart.style.zoom=1;drawLinks();
+  try{
+    // ความสูงวัดถึงขอบล่างของการ์ดใบที่ต่ำที่สุด (scrollHeight บางครั้งสั้นกว่า ทำให้การ์ดแถวล่างถูกตัด)
+    // และความกว้างวัดถึงขอบขวาของการ์ดใบที่อยู่ขวาสุด เพื่อให้ได้การ์ดครบทุกใบ
+    const cr=chart.getBoundingClientRect(),boxes=[...chart.querySelectorAll('.card,.cell')].map(c=>c.getBoundingClientRect());
+    const low=Math.max(0,...boxes.map(b=>b.bottom-cr.top)),right=Math.max(0,...boxes.map(b=>b.right-cr.left));
+    const w=Math.ceil(Math.max(chart.scrollWidth,right+24)),h=Math.ceil(Math.max(chart.scrollHeight,low+2));
+    const scale=Math.max(1,Math.min(2,Math.sqrt(30e6/(w*h)))); // ความคมชัด 2 เท่า แต่ไม่ให้รูปใหญ่เกินที่เบราว์เซอร์รับได้
+    const bg=getComputedStyle(document.body).backgroundColor||'#fff';
+    const cv=await html2canvas(chart,{backgroundColor:bg,scale,width:w,height:h,windowWidth:Math.max(innerWidth,w+40),useCORS:true,logging:false,
+      onclone:doc=>{const c=doc.getElementById('chart');if(c){c.style.zoom=1;c.style.overflow='visible';}}});
+    // เว้นที่ว่างใต้การ์ดแถวล่างสุด ไม่ให้ชิดขอบล่างของไฟล์
+    const pad=Math.round(48*scale),out=document.createElement('canvas');out.width=cv.width;out.height=cv.height+pad;
+    const g=out.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,out.width,out.height);g.drawImage(cv,0,0);
+    return out;
+  }finally{chart.style.zoom=prevZ;drawLinks();}
+}
+function saveBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);}
+async function doExport(kind){
+  expMenu(false);toast(kind==='pdf'?'กำลังสร้าง PDF…':'กำลังสร้างรูป…');
+  try{
+    const cv=await chartCanvas();
+    if(kind==='jpg'){cv.toBlob(b=>saveBlob(b,expName('jpg')),'image/jpeg',.92);}
+    else{
+      await loadLib('pdf');
+      const land=cv.width>=cv.height,doc=new jspdf.jsPDF({orientation:land?'landscape':'portrait',unit:'mm',format:'a4'});
+      const pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight(),m=8;
+      const r=Math.min((pw-2*m)/cv.width,(ph-2*m)/cv.height),iw=cv.width*r,ih=cv.height*r;
+      doc.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',(pw-iw)/2,(ph-ih)/2,iw,ih);
+      doc.save(expName('pdf'));
+    }
+    toast('บันทึกแล้ว');
+  }catch(x){toast(x.message==='lib'?'โหลดเครื่องมือ Export ไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง':x.message==='empty'?'ยังไม่มีผังให้บันทึก':'บันทึกไม่สำเร็จ ลองอีกครั้ง');}
+}
+document.addEventListener('click',e=>{const b=e.target.closest('.expmenu [data-exp]');if(b)doExport(b.dataset.exp);});
 
 /* ---------- ลบตระกูล / กู้คืนตระกูล (เฉพาะผู้ดูแล) ---------- */
 // ใช้เกณฑ์เดียวกับ Code.gs: คนในตระกูล + คู่สมรสที่แต่งเข้ามาซึ่งไม่ได้อยู่ตระกูลอื่นที่ตั้งไว้ และคู่สมรสทุกคนถูกลบด้วย
@@ -2414,7 +2472,8 @@ document.addEventListener('click',async e=>{
   else if(act==='cdo')doClanDelete();
   else if(act==='crestore')doClanRestore(a.dataset.batch);
   else if(act==='users')openUsers();
-  else if(act==='viewmenu'){optMenu(false);viewMenu();}
+  else if(act==='viewmenu'){optMenu(false);expMenu(false);viewMenu();}
+  else if(act==='expmenu'){optMenu(false);viewMenu(false);expMenu();}
   else if(act==='uclose')closeUsers();
   else if(act==='pweye'){const i=$('u-pw'),show=i.type==='password';i.type=show?'text':'password';a.textContent=show?'ซ่อน':'แสดง';}
   else if(act==='clanmenu')clanMenu();
@@ -2508,7 +2567,7 @@ document.addEventListener('click',e=>{
   if(!document.body.classList.contains('menuopen'))return;
   if(e.target.closest('#menubtn'))return;
   // กดปุ่มในเมนูแล้วปิดเมนู ยกเว้นปุ่มเปิดเมนูย่อย "เพิ่มข้อมูล"
-  if(e.target.closest('#acct')){if(e.target.closest('[data-act=optmenu],[data-act=viewmenu]'))return;if(e.target.closest('button'))setTimeout(()=>setMenu(false),0);return;}
+  if(e.target.closest('#acct')){if(e.target.closest('[data-act=optmenu],[data-act=viewmenu],[data-act=expmenu]'))return;if(e.target.closest('button'))setTimeout(()=>setMenu(false),0);return;}
   setMenu(false);
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('menuopen'))setMenu(false);});
